@@ -1,8 +1,8 @@
 package model.entity;
 
 public class Device {
-    private String deviceId;
-    private String customerCode;
+    private int deviceId;
+    private int customerCode;  // Keep as int to match database
     private String deviceType;
     private String brand;
     private String model;
@@ -10,9 +10,9 @@ public class Device {
     private String description;
 
     // Constructor
-    public Device(int deviceId, String customerCode, String deviceType, String brand, 
+    public Device(int deviceId, int customerCode, String deviceType, String brand, 
                  String model, String serialNumber, String description) {
-        this.deviceId = String.valueOf(deviceId);
+        this.deviceId = deviceId;
         this.customerCode = customerCode;
         this.deviceType = deviceType;
         this.brand = brand;
@@ -22,11 +22,11 @@ public class Device {
     }
 
     // Getters and setters
-    public String getDeviceId() { return deviceId; }
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+    public int getDeviceId() { return deviceId; }
+    public void setDeviceId(int deviceId) { this.deviceId = deviceId; }
     
-    public String getCustomerCode() { return customerCode; }
-    public void setCustomerCode(String customerCode) { this.customerCode = customerCode; }
+    public int getCustomerCode() { return customerCode; }
+    public void setCustomerCode(int customerCode) { this.customerCode = customerCode; }
     
     public String getDeviceType() { return deviceType; }
     public void setDeviceType(String deviceType) { this.deviceType = deviceType; }

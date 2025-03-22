@@ -11,7 +11,7 @@ public class DeviceController {
     private Device createDeviceFromResultSet(ResultSet rs) throws SQLException {
         return new Device(
             rs.getInt("deviceID"),
-            rs.getString("customerCode"),
+            rs.getInt("customerCode"),
             rs.getString("deviceType"),
             rs.getString("brand"),
             rs.getString("model"),
@@ -34,7 +34,7 @@ public class DeviceController {
         if (!isUpdate) {
             pstmt.setInt(paramIndex++, device.getDeviceId());
         }
-        pstmt.setString(paramIndex++, device.getCustomerCode());
+        pstmt.setInt(paramIndex++, device.getCustomerCode());
         pstmt.setString(paramIndex++, device.getDeviceType());
         pstmt.setString(paramIndex++, device.getBrand());
         pstmt.setString(paramIndex++, device.getModel());
@@ -140,14 +140,14 @@ public class DeviceController {
         return null;
     }
 
-    public List<Device> getCustomerDevices(String customerCode) throws SQLException {
+    public List<Device> getCustomerDevices(int customerCode) throws SQLException {
         List<Device> devices = new ArrayList<>();
         String sql = "SELECT * FROM devices WHERE customerCode = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, customerCode);
+            pstmt.setInt(1, customerCode);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
@@ -158,15 +158,29 @@ public class DeviceController {
     }
 
     public List<Device> searchDevices(String criteria, String searchText) throws SQLException {
-        String columnName = switch (criteria) {
-            case "Device ID" -> "deviceID";
-            case "Customer Code" -> "customerCode";
-            case "Device Type" -> "deviceType";
-            case "Brand" -> "brand";
-            case "Model" -> "model";
-            case "Serial Number" -> "serialNumber";
-            default -> throw new SQLException("Invalid search criteria");
-        };
+        String columnName;
+        switch (criteria) {
+            case "Device ID":
+                columnName = "deviceID";
+                break;
+            case "Customer Code":
+                columnName = "customerCode";
+                break;
+            case "Device Type":
+                columnName = "deviceType";
+                break;
+            case "Brand":
+                columnName = "brand";
+                break;
+            case "Model":
+                columnName = "model";
+                break;
+            case "Serial Number":
+                columnName = "serialNumber";
+                break;
+            default:
+                throw new SQLException("Invalid search criteria");
+        }
         
         String sql = "SELECT * FROM devices WHERE " + columnName + " LIKE ?";
         List<Device> devices = new ArrayList<>();

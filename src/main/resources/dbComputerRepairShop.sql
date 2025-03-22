@@ -130,7 +130,3 @@ INSERT INTO appointments (customerCode, technicianID, serviceStatus, dateAndTime
 (1003, 105, 'For Pickup', '2024-02-28 16:15:00', 1010, 'Paid', 2200.00, 10),
 (1004, 101, 'In Progress', '2024-03-05 09:00:00', 1011, 'Pending', 0.00, 4),
 (1005, 102, 'Pending', '2024-03-10 13:45:00', 1012, 'Pending', 0.00, 5);
-
-SELECT * FROM customers;
-SELECT * FROM technicians;
-SELECT * FROM appointments;

@@ -8,14 +8,14 @@ import java.sql.SQLException;
 import model.entity.Device;
 
 public class DeviceManagementDialog extends JDialog {
-    private String customerCode;
+    private int customerCode;
     private JTable deviceTable;
     private DefaultTableModel tableModel;
     private DeviceController deviceController = new DeviceController();
     private JTextField deviceTypeField, brandField, modelField, serialNumberField;
     private JTextArea descriptionArea;
 
-    public DeviceManagementDialog(JFrame parent, String customerCode, String customerName) {
+    public DeviceManagementDialog(JFrame parent, int customerCode, String customerName) {
         super(parent, "Devices for: " + customerName, true);
         this.customerCode = customerCode;
         
@@ -128,7 +128,7 @@ public class DeviceManagementDialog extends JDialog {
         try {
             for (Device device : deviceController.getCustomerDevices(customerCode)) {
                 Object[] row = {
-                    String.valueOf(device.getDeviceId()),
+                    device.getDeviceId(),
                     device.getDeviceType(),
                     device.getBrand(),
                     device.getModel(),
@@ -214,8 +214,7 @@ public class DeviceManagementDialog extends JDialog {
                 return;
             }
 
-            String deviceIdStr = tableModel.getValueAt(row, 0).toString();
-            int deviceId = Integer.parseInt(deviceIdStr);
+            int deviceId = Integer.parseInt(tableModel.getValueAt(row, 0).toString());
             
             int confirm = JOptionPane.showConfirmDialog(
                 this,
@@ -225,7 +224,7 @@ public class DeviceManagementDialog extends JDialog {
             );
             
             if (confirm == JOptionPane.YES_OPTION) {
-                deviceController.deleteDevice(String.valueOf(deviceId));
+                deviceController.deleteDevice(deviceId);
                 JOptionPane.showMessageDialog(this, "Device deleted successfully!");
                 clearFields();
                 loadDeviceData();

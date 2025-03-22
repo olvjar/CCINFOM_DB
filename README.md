@@ -96,8 +96,8 @@ src/main/java/
     ├── LandingView.java           # Landing portal
     │
     ├── dialog/   # Popup dialogs
-    │   ├── LoginDialog.java        # Authentication
-    │   └── DeviceManagementDialog.java # Device operations
+    │   ├── LoginDialog.java                # Authentication
+    │   └── DeviceManagementDialog.java     # Device operations
     │
     ├── management/ # Management interfaces
     │   ├── CustomerManagementFrame.java

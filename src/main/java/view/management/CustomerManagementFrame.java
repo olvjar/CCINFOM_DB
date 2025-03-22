@@ -380,7 +380,7 @@ public class CustomerManagementFrame extends JFrame {
             return;
         }
 
-        String customerCode = (String) tableModel.getValueAt(selectedRow, 0);
+        int customerCode = Integer.parseInt((String) tableModel.getValueAt(selectedRow, 0));
         String customerName = tableModel.getValueAt(selectedRow, 1) + " " + tableModel.getValueAt(selectedRow, 2);
         
         DeviceManagementDialog dialog = new DeviceManagementDialog(this, customerCode, customerName);
