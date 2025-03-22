@@ -70,10 +70,10 @@ mvn clean compile exec:java
 ```
 src/main/java/
 │
-├── controller/   # logic and data access
-│   ├── CustomerController.java     # Customer operations
-│   ├── DeviceController.java       # Device operations
-│   └── TechnicianController.java   # Technician operations
+├── controller/   # logic and data access for RECORDS MANAGEMENT operations
+│   ├── CustomerController.java     # Customer Records Management
+│   ├── DeviceController.java       # Device Records Management 
+│   └── TechnicianController.java   # Technician Records Management
 │
 ├── model/        # Data models
 │   ├── entity/   # Domain objects
