@@ -29,8 +29,10 @@ public class CustomerView extends JFrame {
         initializeFrame();
         loadCustomerData();
         setupComponents();
-        
-        // Set system look and feel
+        setLookAndFeel();
+    }
+
+    private void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             SwingUtilities.updateComponentTreeUI(this);
@@ -54,36 +56,31 @@ public class CustomerView extends JFrame {
                 setTitle("Customer - " + currentCustomer.getFullName());
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this,
-                "Error loading customer data: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorDialog("Error loading customer data: " + e.getMessage());
         }
+    }
+
+    private void showErrorDialog(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     private void setupComponents() {
         JPanel mainPanel = new JPanel(new BorderLayout(0, 0));
         mainPanel.setBackground(ColorUtils.BACKGROUND);
 
-        // Top Navigation Bar
-        JPanel navBar = createNavigationBar();
-        mainPanel.add(navBar, BorderLayout.NORTH);
+        mainPanel.add(createNavigationBar(), BorderLayout.NORTH);
+        mainPanel.add(createContentPanel(), BorderLayout.CENTER);
+        add(mainPanel);
+    }
 
-        // Main Content Panel with Cards and Info
+    private JPanel createContentPanel() {
         JPanel contentPanel = new JPanel(new BorderLayout(20, 20));
         contentPanel.setBackground(ColorUtils.BACKGROUND);
         contentPanel.setBorder(new EmptyBorder(20, 30, 30, 30));
 
-        // Customer Info Panel
-        JPanel customerInfoPanel = createCustomerInfoPanel();
-        contentPanel.add(customerInfoPanel, BorderLayout.NORTH);
-
-        // Action Cards Panel
-        JPanel cardsPanel = createActionCardsPanel();
-        contentPanel.add(cardsPanel, BorderLayout.CENTER);
-
-        mainPanel.add(contentPanel, BorderLayout.CENTER);
-        add(mainPanel);
+        contentPanel.add(createCustomerInfoPanel(), BorderLayout.NORTH);
+        contentPanel.add(createActionCardsPanel(), BorderLayout.CENTER);
+        return contentPanel;
     }
 
     private JPanel createNavigationBar() {
@@ -92,18 +89,20 @@ public class CustomerView extends JFrame {
         navBar.setPreferredSize(new Dimension(getWidth(), 60));
         navBar.setBorder(new EmptyBorder(10, 20, 10, 20));
 
-        // Company Logo/Name
         JLabel logoLabel = new JLabel("Customer Portal");
         logoLabel.setFont(new Font("Arial", Font.BOLD, 24));
         logoLabel.setForeground(ColorUtils.TEXT_LIGHT);
         
-        // Right-aligned components
+        JPanel rightPanel = createRightPanel();
+        navBar.add(logoLabel, BorderLayout.WEST);
+        navBar.add(rightPanel, BorderLayout.EAST);
+
+        return navBar;
+    }
+
+    private JPanel createRightPanel() {
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.setOpaque(false);
-        
-        JLabel userLabel = new JLabel(currentCustomer != null ? currentCustomer.getFullName() : "Customer");
-        userLabel.setForeground(ColorUtils.TEXT_LIGHT);
-        userLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         
         JButton logoutButton = new JButton("Logout");
         styleButton(logoutButton);
@@ -111,15 +110,9 @@ public class CustomerView extends JFrame {
             new LandingView().setVisible(true);
             dispose();
         });
-
-        rightPanel.add(userLabel);
-        rightPanel.add(Box.createHorizontalStrut(20));
         rightPanel.add(logoutButton);
 
-        navBar.add(logoLabel, BorderLayout.WEST);
-        navBar.add(rightPanel, BorderLayout.EAST);
-
-        return navBar;
+        return rightPanel;
     }
 
     private JPanel createCustomerInfoPanel() {
@@ -156,8 +149,6 @@ public class CustomerView extends JFrame {
             if (currentCustomer != null) {
                 addInfoField(panel, "Contact:", 
                     currentCustomer.getContactNumber());
-                panel.add(new JLabel(""));
-                panel.add(new JLabel(""));
                 panel.add(new JLabel(""));
             }
 
@@ -301,10 +292,7 @@ public class CustomerView extends JFrame {
         try {
             List<String[]> history = customerController.getCustomerAppointments(customerCode);
             if (history.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "No repair history found.",
-                    "Repair History",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showErrorDialog("No repair history found.");
                 return;
             }
 
@@ -323,10 +311,7 @@ public class CustomerView extends JFrame {
             dialog.setVisible(true);
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this,
-                "Error loading repair history: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorDialog("Error loading repair history: " + e.getMessage());
         }
     }
 
@@ -334,10 +319,7 @@ public class CustomerView extends JFrame {
         try {
             List<Device> devices = deviceController.getCustomerDevices(Integer.parseInt(customerCode));
             if (devices.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "No devices registered.",
-                    "Devices",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showErrorDialog("No devices registered.");
                 return;
             }
 
@@ -364,10 +346,7 @@ public class CustomerView extends JFrame {
             dialog.setVisible(true);
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this,
-                "Error loading devices: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorDialog("Error loading devices: " + e.getMessage());
         }
     }
 
