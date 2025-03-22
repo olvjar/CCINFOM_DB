@@ -4,7 +4,7 @@ import view.management.CustomerManagementFrame;
 import view.management.TechnicianManagementFrame;
 import view.management.InventoryManagementFrame;
 import view.management.AppointmentManagementFrame;
-import util.GuiUtils;
+import view.utils.GuiUtils;
 import javax.swing.*;
 import java.awt.*;
 
@@ -15,19 +15,19 @@ public class ModuleButtonsPanel extends JPanel {
     }
 
     private void initializeButtons() {
-        JButton customerButton = GuiUtils.createModuleButton(
+        JButton customerButton = view.utils.GuiUtils.createModuleButton(
             "Customer Management", 
             "Manage customer records and services"
         );
-        JButton technicianButton = GuiUtils.createModuleButton(
+        JButton technicianButton = view.utils.GuiUtils.createModuleButton(
             "Technician Management", 
             "Manage technician records and assignments"
         );
-        JButton inventoryButton = GuiUtils.createModuleButton(
+        JButton inventoryButton = view.utils.GuiUtils.createModuleButton(
             "Inventory Management", 
             "Manage product inventory and stock"
         );
-        JButton appointmentButton = GuiUtils.createModuleButton(
+        JButton appointmentButton = view.utils.GuiUtils.createModuleButton(
             "Appointment Management", 
             "Manage service appointments and schedules"
         );

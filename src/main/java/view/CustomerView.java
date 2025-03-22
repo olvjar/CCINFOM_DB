@@ -4,8 +4,8 @@ import controller.CustomerController;
 import controller.DeviceController;
 import model.entity.Customer;
 import model.entity.Device;
-import util.GuiUtils;
 import view.utils.ColorUtils;
+import view.utils.GuiUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;

@@ -3,7 +3,7 @@ package view;
 import view.dialog.LoginDialog;
 import javax.swing.*;
 import java.awt.*;
-import util.GuiUtils;
+import view.utils.GuiUtils;
 
 public class LandingView extends JFrame {
     public LandingView() {
@@ -31,9 +31,9 @@ public class LandingView extends JFrame {
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
         
-        JButton customerButton = GuiUtils.createModuleButton("Customer Access", 
+        JButton customerButton = view.utils.GuiUtils.createModuleButton("Customer Access", 
             "Schedule repairs and view status");
-        JButton technicianButton = GuiUtils.createModuleButton("Technician Access", 
+        JButton technicianButton = view.utils.GuiUtils.createModuleButton("Technician Access", 
             "Manage repairs and inventory");
             
 
