@@ -198,9 +198,11 @@ public class CustomerService {
     public List<String[]> getCustomerAppointments(String customerCode) throws SQLException {
         List<String[]> appointments = new ArrayList<>();
         String sql = "SELECT a.invoiceNumber, a.dateAndTime, a.serviceStatus, a.paymentStatus, " +
-                    "d.deviceType, d.brand, d.model " +
+                    "d.deviceType, d.brand, d.model, " +
+                    "CONCAT(t.firstName, ' ', t.lastName) as technicianName " +
                     "FROM appointments a " +
                     "LEFT JOIN devices d ON a.deviceID = d.deviceID " +
+                    "LEFT JOIN technicians t ON a.technicianID = t.technicianID " +
                     "WHERE a.customerCode = ? " +
                     "ORDER BY a.dateAndTime DESC";
         
@@ -218,12 +220,20 @@ public class CustomerService {
                     deviceInfo = "No device specified";
                 }
                 
+                String technicianName = rs.getString("technicianName");
+                if (technicianName != null) {
+                    technicianName = technicianName;
+                } else {
+                    technicianName = "Not assigned";
+                }
+                
                 String[] appointment = {
                     String.valueOf(rs.getInt("invoiceNumber")),
                     rs.getTimestamp("dateAndTime").toString(),
                     rs.getString("serviceStatus"),
                     rs.getString("paymentStatus"),
-                    deviceInfo
+                    deviceInfo,
+                    technicianName
                 };
                 appointments.add(appointment);
             }
