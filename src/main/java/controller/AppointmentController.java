@@ -150,8 +150,10 @@ public class AppointmentController
                 break;
             case "Amount Paid":
                 columnName = "amountPaid";
+                break;
             case "Device ID":
                 columnName = "deviceID";
+                break;
             default:
                 throw new SQLException("Invalid search criteria");
         }
