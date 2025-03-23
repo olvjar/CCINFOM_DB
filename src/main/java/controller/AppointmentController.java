@@ -127,7 +127,7 @@ public class AppointmentController
         }
     }
     
-    public List<Customer> searchCustomers(String criteria, String searchText) throws SQLException {
+    public List<Appointment> searchAppointments (String criteria, String searchText) throws SQLException {
         String columnName;
         switch (criteria) {
             case "Customer Code":
