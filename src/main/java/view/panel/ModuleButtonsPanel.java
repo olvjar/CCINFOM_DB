@@ -1,5 +1,7 @@
 package view.panel;
 
+import controller.CustomerController;
+import model.service.CustomerService;
 import view.management.CustomerManagementFrame;
 import view.management.TechnicianManagementFrame;
 import view.management.InventoryManagementFrame;
@@ -10,7 +12,8 @@ import java.awt.*;
 
 public class ModuleButtonsPanel extends JPanel {
     public ModuleButtonsPanel() {
-        setLayout(new GridLayout(2, 2, 10, 10));
+        setLayout(new GridLayout(2, 3, 10, 10));
+        setBorder(BorderFactory.createTitledBorder("Modules"));
         initializeButtons();
     }
 
@@ -41,9 +44,7 @@ public class ModuleButtonsPanel extends JPanel {
     }
 
     private void setupActionListeners(JButton... buttons) {
-        buttons[0].addActionListener(e -> 
-            new CustomerManagementFrame().setVisible(true)
-        );
+        buttons[0].addActionListener(e -> openCustomerManagement());
         buttons[1].addActionListener(e -> 
             JOptionPane.showMessageDialog(this, "Technician Management module is under development")
         );
@@ -53,5 +54,12 @@ public class ModuleButtonsPanel extends JPanel {
         buttons[3].addActionListener(e -> 
             JOptionPane.showMessageDialog(this, "Appointment Management module is under development")
         );
+    }
+
+    private void openCustomerManagement() {
+        CustomerService customerService = new CustomerService();
+        CustomerController customerController = new CustomerController(customerService);
+        CustomerManagementFrame frame = new CustomerManagementFrame(customerController);
+        frame.setVisible(true);
     }
 } 
