@@ -6,7 +6,7 @@ public class Technician {
     private String lastName;
     private String contactNumber;
     private String address;
-    private String availability; // Changed from boolean to String
+    private String availability;
 
     public Technician(int technicianID, String firstName, String lastName, String contactNumber, String address, String availability) {
         this.technicianID = technicianID;
@@ -37,7 +37,7 @@ public class Technician {
         return address;
     }
 
-    public String getAvailability() { // Changed from boolean method
+    public String getAvailability() {
         return availability;
     }
 }
