@@ -2,16 +2,18 @@ package model.entity;
 
 public class Technician {
     private int technicianID;
-    private String technicianName;
+    private String firstName;
+    private String lastName;
     private String contactNumber;
-    private String completeAddress;
-    private boolean availability;
+    private String address;
+    private String availability; // Changed from boolean to String
 
-    public Technician(int technicianID, String technicianName, String contactNumber, String completeAddress, boolean availability) {
+    public Technician(int technicianID, String firstName, String lastName, String contactNumber, String address, String availability) {
         this.technicianID = technicianID;
-        this.technicianName = technicianName;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.contactNumber = contactNumber;
-        this.completeAddress = completeAddress;
+        this.address = address;
         this.availability = availability;
     }
 
@@ -19,19 +21,23 @@ public class Technician {
         return technicianID;
     }
 
-    public String getTechnicianName() {
-        return technicianName;
+    public String getFirstName() {
+        return firstName;
+    }
+    
+    public String getLastName() {
+        return lastName;
     }
 
     public String getContactNumber() {
         return contactNumber;
     }
 
-    public String getCompleteAddress() {
-        return completeAddress;
+    public String getAddress() {
+        return address;
     }
 
-    public boolean isAvailable() {
+    public String getAvailability() { // Changed from boolean method
         return availability;
     }
 }
