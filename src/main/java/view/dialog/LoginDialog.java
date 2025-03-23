@@ -2,13 +2,11 @@ package view.dialog;
 
 import controller.CustomerController;
 import controller.TechnicianController;
-import view.CustomerView;
-import view.TechnicianView;
-import view.utils.ColorUtils;
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class LoginDialog extends JDialog {
+
     private JTextField firstNameField;
     private JTextField lastNameField;
     private JTextField idField;
@@ -16,7 +14,8 @@ public class LoginDialog extends JDialog {
     private boolean authenticated = false;
     private String authenticatedId;
     private CustomerController customerController = new CustomerController();
-    private TechnicianController technicianController = new TechnicianController();
+    private TechnicianController technicianController =
+        new TechnicianController();
 
     public LoginDialog(JFrame parent, boolean isCustomer) {
         super(parent, "Login", true);
@@ -37,12 +36,37 @@ public class LoginDialog extends JDialog {
         gbc.gridy = 1;
 
         if (isCustomer) {
-            addInputField(inputPanel, gbc, "First Name:", firstNameField = new JTextField(20));
-            addInputField(inputPanel, gbc, "Last Name:", lastNameField = new JTextField(20));
+            addInputField(
+                inputPanel,
+                gbc,
+                "First Name:",
+                firstNameField = new JTextField(20)
+            );
+            addInputField(
+                inputPanel,
+                gbc,
+                "Last Name:",
+                lastNameField = new JTextField(20)
+            );
         } else {
-            addInputField(inputPanel, gbc, "Technician ID:", idField = new JTextField(20));
-            addInputField(inputPanel, gbc, "First Name:", firstNameField = new JTextField(20));
-            addInputField(inputPanel, gbc, "Last Name:", lastNameField = new JTextField(20));
+            addInputField(
+                inputPanel,
+                gbc,
+                "Technician ID:",
+                idField = new JTextField(20)
+            );
+            addInputField(
+                inputPanel,
+                gbc,
+                "First Name:",
+                firstNameField = new JTextField(20)
+            );
+            addInputField(
+                inputPanel,
+                gbc,
+                "Last Name:",
+                lastNameField = new JTextField(20)
+            );
         }
 
         gbc.gridx = 0;
@@ -69,12 +93,17 @@ public class LoginDialog extends JDialog {
         add(buttonPanel, gbc);
     }
 
-    private void addInputField(JPanel panel, GridBagConstraints gbc, String labelText, JTextField textField) {
+    private void addInputField(
+        JPanel panel,
+        GridBagConstraints gbc,
+        String labelText,
+        JTextField textField
+    ) {
         JLabel label = new JLabel(labelText);
         gbc.gridx = 0;
         gbc.anchor = GridBagConstraints.EAST;
         panel.add(label, gbc);
-        
+
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         panel.add(textField, gbc);
@@ -92,39 +121,54 @@ public class LoginDialog extends JDialog {
             if (isCustomer) {
                 String firstName = firstNameField.getText().trim();
                 String lastName = lastNameField.getText().trim();
-                
-                String customerCode = customerController.validateCustomer(firstName, lastName);
+
+                String customerCode = customerController.validateCustomer(
+                    firstName,
+                    lastName
+                );
                 if (customerCode != null) {
                     authenticated = true;
                     authenticatedId = customerCode;
                     dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, 
+                    JOptionPane.showMessageDialog(
+                        this,
                         "Invalid customer name. Please try again.",
                         "Login Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE
+                    );
                 }
             } else {
                 String techId = idField.getText().trim();
                 String firstName = firstNameField.getText().trim();
                 String lastName = lastNameField.getText().trim();
-                
-                if (technicianController.validateTechnician(techId, firstName, lastName)) {
+
+                if (
+                    technicianController.validateTechnician(
+                        techId,
+                        firstName,
+                        lastName
+                    )
+                ) {
                     authenticated = true;
                     authenticatedId = techId;
                     dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, 
+                    JOptionPane.showMessageDialog(
+                        this,
                         "Invalid technician credentials. Please try again.",
                         "Login Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE
+                    );
                 }
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                this,
                 "Error during login: " + e.getMessage(),
                 "Login Error",
-                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -135,4 +179,4 @@ public class LoginDialog extends JDialog {
     public String getAuthenticatedId() {
         return authenticatedId;
     }
-} 
+}
