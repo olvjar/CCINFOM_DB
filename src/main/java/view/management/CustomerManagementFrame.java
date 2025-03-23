@@ -14,23 +14,26 @@ public class CustomerManagementFrame extends JFrame {
     private JTable customerTable;
     private DefaultTableModel tableModel;
     private JTextField customerCodeField, firstNameField, lastNameField, contactNumberField, addressField;
-    private JButton addButton, updateButton, deleteButton, viewAppointmentsButton, viewDevicesButton;
-    private CustomerController customerController = new CustomerController();
+    private JTextField searchField;
+    private JComboBox<String> searchCriteria;
+    private JButton addButton, updateButton, deleteButton, viewAppointmentsButton, viewDevicesButton, searchButton;
+    private CustomerController customerController;
 
-    public CustomerManagementFrame() {
+    public CustomerManagementFrame(CustomerController controller) {
+        this.customerController = controller;
         setTitle("Customer Management");
         setSize(1000, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         initComponents();
-        loadCustomerData();
+        customerController.setView(this);
+        customerController.loadAllCustomers();
     }
 
     private void initComponents() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // CREATE:
         // left panel
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setPreferredSize(new Dimension(300, getHeight()));
@@ -43,7 +46,7 @@ public class CustomerManagementFrame extends JFrame {
         // Filter dropdown
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel filterLabel = new JLabel("Search by:");
-        JComboBox<String> searchCriteria = new JComboBox<>(new String[]{
+        searchCriteria = new JComboBox<>(new String[]{
             "Customer Code", "First Name", "Last Name", "Contact Number"
         });
         filterPanel.add(filterLabel);
@@ -51,42 +54,14 @@ public class CustomerManagementFrame extends JFrame {
         
         // search bar panel
         JPanel searchBarPanel = new JPanel(new BorderLayout(5, 0));
-        JTextField searchField = new JTextField();
-        JButton searchButton = new JButton("Search");
+        searchField = new JTextField();
+        searchButton = new JButton("Search");
         searchBarPanel.add(searchField, BorderLayout.CENTER);
         searchBarPanel.add(searchButton, BorderLayout.EAST);
         
         searchPanel.add(filterPanel);
         searchPanel.add(Box.createRigidArea(new Dimension(0, 5))); // Spacing
         searchPanel.add(searchBarPanel);
-
-        // search functionality
-        searchButton.addActionListener(e -> {
-            String searchText = searchField.getText().trim();
-            String criteria = (String) searchCriteria.getSelectedItem();
-            
-            if (searchText.isEmpty()) {
-                loadCustomerData(); // Reset to show all if search is empty
-                return;
-            }
-            
-            try {
-                List<Customer> results = customerController.searchCustomers(criteria, searchText);
-                updateTableWithResults(results);
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error searching customers: " + ex.getMessage(),
-                    "Search Error",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        // reset search
-        searchField.addActionListener(e -> {
-            if (searchField.getText().trim().isEmpty()) {
-                loadCustomerData();
-            }
-        });
 
         // left content panel
         JPanel leftContentPanel = new JPanel();
@@ -135,6 +110,7 @@ public class CustomerManagementFrame extends JFrame {
         // exit button
         JPanel exitPanel = new JPanel(new GridLayout(1, 1, 5, 5));
         JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> dispose()); // Keep this simple action here
         exitPanel.add(exitButton);
 
         leftContentPanel.add(inputPanel);
@@ -155,15 +131,7 @@ public class CustomerManagementFrame extends JFrame {
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         add(mainPanel);
 
-        // action listeners
-        addButton.addActionListener(e -> addCustomer());
-        updateButton.addActionListener(e -> updateCustomer());
-        deleteButton.addActionListener(e -> deleteCustomer());
-        viewAppointmentsButton.addActionListener(e -> viewAppointments());
-        viewDevicesButton.addActionListener(e -> viewDevices());
-        exitButton.addActionListener(e -> dispose());
-
-        // table selection listener
+        // table selection listener (keep this here since it's UI-specific)
         customerTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = customerTable.getSelectedRow();
@@ -178,108 +146,79 @@ public class CustomerManagementFrame extends JFrame {
         });
     }
 
-    private void loadCustomerData() {
-        tableModel.setRowCount(0);
-        try {
-            for (Customer customer : customerController.getAllCustomers()) {
-                Object[] row = {
-                    customer.getCustomerCode(),
-                    customer.getFirstName(),
-                    customer.getLastName(),
-                    customer.getContactNumber(),
-                    customer.getAddress()
-                };
-                tableModel.addRow(row);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error loading customers: " + e.getMessage());
-        }
+    public JButton getAddButton() { return addButton; }
+    public JButton getUpdateButton() { return updateButton; }
+    public JButton getDeleteButton() { return deleteButton; }
+    public JButton getViewAppointmentsButton() { return viewAppointmentsButton; }
+    public JButton getViewDevicesButton() { return viewDevicesButton; }
+    public JButton getSearchButton() { return searchButton; }
+    public JTextField getSearchField() { return searchField; }
+    public String getSearchCriteria() { return (String) searchCriteria.getSelectedItem(); }
+    
+    public Customer getCustomerFromFields() {
+        return new Customer(
+            customerCodeField.getText(),
+            firstNameField.getText(),
+            lastNameField.getText(),
+            contactNumberField.getText(),
+            addressField.getText()
+        );
     }
 
-    private void addCustomer() {
-        try {
-            Customer customer = new Customer(
-                customerCodeField.getText(),
-                firstNameField.getText(),
-                lastNameField.getText(),
-                contactNumberField.getText(),
-                addressField.getText()
-            );
-            
-            customerController.addCustomer(customer);
-            loadCustomerData();
-            clearFields();
-            JOptionPane.showMessageDialog(this, "Customer added successfully!");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error adding customer: " + e.getMessage());
-        }
-    }
-
-    private void updateCustomer() {
+    public String getSelectedCustomerCode() {
         int selectedRow = customerTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a customer to update!");
-            return;
-        }
-
-        try {
-            Customer customer = new Customer(
-                customerCodeField.getText(),
-                firstNameField.getText(),
-                lastNameField.getText(),
-                contactNumberField.getText(),
-                addressField.getText()
-            );
-            
-            customerController.updateCustomer(customer);
-            loadCustomerData();
-            clearFields();
-            JOptionPane.showMessageDialog(this, "Customer updated successfully!");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error updating customer: " + e.getMessage());
-        }
+        if (selectedRow == -1) return null;
+        return (String) tableModel.getValueAt(selectedRow, 0);
     }
-
-    private void deleteCustomer() {
+    
+    public Customer getSelectedCustomer() {
         int selectedRow = customerTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a customer to delete!");
-            return;
-        }
-
-        String customerCode = (String) tableModel.getValueAt(selectedRow, 0);
+        if (selectedRow == -1) return null;
         
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to delete this customer?",
-            "Confirm Delete",
-            JOptionPane.YES_NO_OPTION);
-            
-        if (confirm == JOptionPane.YES_OPTION) {
-            try {
-                customerController.deleteCustomer(customerCode);
-                loadCustomerData();
-                clearFields();
-                JOptionPane.showMessageDialog(this, "Customer deleted successfully!");
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "Error deleting customer: " + e.getMessage());
-            }
+        return new Customer(
+            (String) tableModel.getValueAt(selectedRow, 0),
+            (String) tableModel.getValueAt(selectedRow, 1),
+            (String) tableModel.getValueAt(selectedRow, 2),
+            (String) tableModel.getValueAt(selectedRow, 3),
+            (String) tableModel.getValueAt(selectedRow, 4)
+        );
+    }
+
+    public void updateTableWithResults(List<Customer> customers) {
+        tableModel.setRowCount(0);
+        for (Customer customer : customers) {
+            Object[] row = {
+                customer.getCustomerCode(),
+                customer.getFirstName(),
+                customer.getLastName(),
+                customer.getContactNumber(),
+                customer.getAddress()
+            };
+            tableModel.addRow(row);
         }
     }
 
-    private void viewAppointments() {
-        int selectedRow = customerTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a customer to view appointments!");
+    public void clearFields() {
+        customerCodeField.setText("");
+        firstNameField.setText("");
+        lastNameField.setText("");
+        contactNumberField.setText("");
+        addressField.setText("");
+    }
+
+    public void showAppointmentsDialog(List<String[]> appointments) {
+        if (appointments == null || appointments.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No appointments found for this customer.");
             return;
         }
 
-        String customerCode = (String) tableModel.getValueAt(selectedRow, 0);
+        int selectedRow = customerTable.getSelectedRow();
         String customerName = tableModel.getValueAt(selectedRow, 1) + " " + tableModel.getValueAt(selectedRow, 2);
         
         JDialog appointmentsDialog = new JDialog(this, "Appointments for: " + customerName, true);
         appointmentsDialog.setSize(800, 400);
 
-        String[] columns = {"Invoice #", "Date & Time", "Service Status", "Payment Status", "Device"};
+        String[] columns = {"Invoice #", "Date & Time", "Service Status", "Payment Status", "Device", "Technician"};
         DefaultTableModel appointmentsModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -288,7 +227,7 @@ public class CustomerManagementFrame extends JFrame {
         };
         JTable appointmentsTable = new JTable(appointmentsModel);
 
-        // Style the status columns to show ENUM values nicely
+        // Style the status columns
         DefaultTableCellRenderer statusRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -303,34 +242,28 @@ public class CustomerManagementFrame extends JFrame {
         };
         appointmentsTable.getColumnModel().getColumn(2).setCellRenderer(statusRenderer);
 
-        // Set column widths
         appointmentsTable.getColumnModel().getColumn(0).setPreferredWidth(70);   // Invoice
         appointmentsTable.getColumnModel().getColumn(1).setPreferredWidth(150);  // Date
         appointmentsTable.getColumnModel().getColumn(2).setPreferredWidth(100);  // Service Status
         appointmentsTable.getColumnModel().getColumn(3).setPreferredWidth(100);  // Payment Status
-        appointmentsTable.getColumnModel().getColumn(4).setPreferredWidth(250);  // Device
+        appointmentsTable.getColumnModel().getColumn(4).setPreferredWidth(200);  // Device
+        appointmentsTable.getColumnModel().getColumn(5).setPreferredWidth(150);  // Technician
 
         // Load appointments
-        try {
-            for (String[] appointment : customerController.getCustomerAppointments(customerCode)) {
-                appointmentsModel.addRow(appointment);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error loading appointments: " + e.getMessage());
+        for (String[] appointment : appointments) {
+            appointmentsModel.addRow(appointment);
         }
 
-        // Create main panel with border layout
+        // Main panel
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Add legend panel at the top
+        // Legend
         JPanel legendPanel = createStatusLegendPanel();
         mainPanel.add(legendPanel, BorderLayout.NORTH);
 
-        // Add table in the center
         mainPanel.add(new JScrollPane(appointmentsTable), BorderLayout.CENTER);
 
-        // Add close button at the bottom
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(e -> appointmentsDialog.dispose());
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -340,6 +273,14 @@ public class CustomerManagementFrame extends JFrame {
         appointmentsDialog.add(mainPanel);
         appointmentsDialog.setLocationRelativeTo(this);
         appointmentsDialog.setVisible(true);
+    }
+
+    public void showDevicesDialog(String customerCode) {
+        int selectedRow = customerTable.getSelectedRow();
+        String customerName = tableModel.getValueAt(selectedRow, 1) + " " + tableModel.getValueAt(selectedRow, 2);
+        
+        DeviceManagementDialog dialog = new DeviceManagementDialog(this, Integer.parseInt(customerCode), customerName);
+        dialog.setVisible(true);
     }
 
     private JPanel createStatusLegendPanel() {
@@ -370,42 +311,6 @@ public class CustomerManagementFrame extends JFrame {
                 return new Color(255, 0, 0);      // Red
             default:
                 return Color.BLACK;
-        }
-    }
-
-    private void viewDevices() {
-        int selectedRow = customerTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a customer to view devices!");
-            return;
-        }
-
-        int customerCode = Integer.parseInt((String) tableModel.getValueAt(selectedRow, 0));
-        String customerName = tableModel.getValueAt(selectedRow, 1) + " " + tableModel.getValueAt(selectedRow, 2);
-        
-        DeviceManagementDialog dialog = new DeviceManagementDialog(this, customerCode, customerName);
-        dialog.setVisible(true);
-    }
-
-    private void clearFields() {
-        customerCodeField.setText("");
-        firstNameField.setText("");
-        lastNameField.setText("");
-        contactNumberField.setText("");
-        addressField.setText("");
-    }
-
-    private void updateTableWithResults(List<Customer> customers) {
-        tableModel.setRowCount(0);
-        for (Customer customer : customers) {
-            Object[] row = {
-                customer.getCustomerCode(),
-                customer.getFirstName(),
-                customer.getLastName(),
-                customer.getContactNumber(),
-                customer.getAddress()
-            };
-            tableModel.addRow(row);
         }
     }
 } 
