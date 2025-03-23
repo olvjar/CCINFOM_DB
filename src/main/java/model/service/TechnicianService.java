@@ -63,14 +63,26 @@ public class TechnicianService {
     }
 
     public List<Technician> searchTechnicians(String criteria, String searchText) throws SQLException {
-        String columnName = switch (criteria) {
-            case "First Name" -> "firstName";
-            case "Last Name" -> "lastName";
-            case "Contact" -> "contactNumber";
-            case "Address" -> "address";
-            case "Availability" -> "availability";
-            default -> "technicianID";
-        };
+        String columnName;
+    switch (criteria) {
+        case "First Name":
+            columnName = "firstName";
+            break;
+        case "Last Name":
+            columnName = "lastName";
+            break;
+        case "Contact":
+            columnName = "contactNumber";
+            break;
+        case "Address":
+            columnName = "address";
+            break;
+        case "Availability":
+            columnName = "availability";
+            break;
+        default:
+            columnName = "technicianID";
+    }
 
         String sql = "SELECT * FROM technicians WHERE " + columnName + " LIKE ?";
         List<Technician> technicians = new ArrayList<>();
