@@ -4,6 +4,8 @@ import controller.CustomerController;
 import controller.DeviceController;
 import model.entity.Customer;
 import model.entity.Device;
+import model.service.CustomerService;
+import model.service.DeviceService;
 import view.utils.ColorUtils;
 import view.utils.GuiUtils;
 
@@ -23,8 +25,10 @@ public class CustomerView extends JFrame {
     
     public CustomerView(String customerCode) {
         this.customerCode = customerCode;
-        this.customerController = new CustomerController();
-        this.deviceController = new DeviceController();
+        CustomerService customerService = new CustomerService();
+        this.customerController = new CustomerController(customerService);
+        DeviceService deviceService = new DeviceService();
+        this.deviceController = new DeviceController(deviceService);
         
         initializeFrame();
         loadCustomerData();
