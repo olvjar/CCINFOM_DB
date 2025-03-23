@@ -2,11 +2,11 @@ package model.entity;
 
 public class Appointment {
 
-    private String customerCode;
-    private String technicianID;
+    private int customerCode;
+    private int technicianID;
     private String serviceStatus;
     private String dateAndTime;
-    private String invoiceNumber;
+    private int invoiceNumber;
     private String paymentStatus;
     private double amountPaid;
     private int deviceID;
