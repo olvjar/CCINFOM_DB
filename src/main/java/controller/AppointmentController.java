@@ -1,5 +1,3 @@
-// Edit: Keep getting errors for this ._. will try to fix them...
-
 package controller;
 
 import model.entity.Appointment;
@@ -36,8 +34,8 @@ public class AppointmentController
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) 
         {
-            pstmt.setInt (1, appointment.getCustomerCode ());
-            pstmt.setInt (2, appointment.getTechnicianID ());
+            pstmt.setString (1, appointment.getCustomerCode ());
+            pstmt.setString (2, appointment.getTechnicianID ());
             pstmt.setString (3, appointment.getServiceStatus ());
             pstmt.setString (4, appointment.getDateAndTime ());
             pstmt.setString (5, appointment.getInvoiceNumber ());
@@ -47,7 +45,7 @@ public class AppointmentController
             pstmt.executeUpdate();
         }
     }
-    
+
     // Update appointment.
     public void updateAppointment (Appointment appointment) throws SQLException
     {
@@ -62,17 +60,17 @@ public class AppointmentController
         }
         
         // Check if appointment exists.
-        Appointment existingAppointment = getAppointmentByInvoiceID (appointment.getInvoiceID ());
+        Appointment existingAppointment = getAppointmentByInvoiceNumber (appointment.getInvoiceNumber ());
         if (existingAppointment == null)
         {
-            throw new IllegalArgumenException ("Appointment not found.");
+            throw new IllegalArgumentException ("Appointment not found.");
         }
         
         String sql = "UPDATE appointments SET customerCode = ?, technicianID = ?, serviceStatus = ?, dateAndTime = ?, invoiceNumber = ?, paymentStatus = ?, amountPaid = ?, deviceID = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt (1, appointment.getCustomerCode ());
-            pstmt.setInt (2, appointment.getTechnicianID ());
+            pstmt.setString (1, appointment.getCustomerCode ());
+            pstmt.setString (2, appointment.getTechnicianID ());
             pstmt.setString (3, appointment.getServiceStatus ());
             pstmt.setString (4, appointment.getDateAndTime ());
             pstmt.setString (5, appointment.getInvoiceNumber ());
@@ -84,16 +82,16 @@ public class AppointmentController
     }
     
     // Delete appointmentttt
-    public void deleteAppointment (int invoiceNumber) throws SQL Exception
+    public void deleteAppointment (String invoiceNumber) throws SQLException
     {
         // Validate input
         if (invoiceNumber == null)
         {
-            throw new IllegalArgumentException("Invoice number cannot be empty.");
+            throw new IllegalArgumentException ("Invoice number cannot be empty.");
         }
 
         // Check if appointment exists.
-        Appointment existingAppointment = getAppointmentByInvoiceID (appointment.getInvoiceID ());
+        Appointment existingAppointment = getAppointmentByInvoiceNumber (invoiceNumber);
         if (existingAppointment == null)
         {
             throw new IllegalArgumentException ("Appointment not found.");
@@ -101,22 +99,30 @@ public class AppointmentController
         
         // Deleteeee
         Connection conn = null;
-        try {
+        try 
+        {
             conn = DatabaseConnection.getConnection();
             conn.setAutoCommit(false);  // Start transaction
             
             String deleteAppointments = "DELETE FROM appointments WHERE invoiceNumber = ?";
-            try (PreparedStatement pstmt = conn.prepareStatement(deleteAppointments)) {
-                pstmt.setInt(1, invoiceNumber);
+            try (PreparedStatement pstmt = conn.prepareStatement(deleteAppointments)) 
+            {
+                pstmt.setString(1, invoiceNumber);
                 pstmt.executeUpdate();
             }
             
             conn.commit();  // Commit transaction
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
+        } 
+        catch (SQLException e) 
+        {
+            if (conn != null) 
+            {
+                try 
+                {
                     conn.rollback();  // Rollback on error
-                } catch (SQLException ex) {
+                } 
+                catch (SQLException ex) 
+                {
                     throw new SQLException("Error rolling back transaction: " + ex.getMessage());
                 }
             }
@@ -171,11 +177,11 @@ public class AppointmentController
             
             while (rs.next()) {
                 Appointment appointment = new Appointment(
-                    Integer.parseInt (rs.getString ("customerCode")),
-                    Integer.parseInt (rs.getString ("technicianID")),
+                    rs.getString ("customerCode"),
+                    rs.getString ("technicianID"),
                     rs.getString ("serviceStatus"),
                     rs.getString ("dateAndTime"),
-                    Integer.parseInt (rs.getString ("invoiceNumber")),
+                    rs.getString ("invoiceNumber"),
                     rs.getString ("paymentStatus"),
                     Double.parseDouble (rs.getString ("amountPaid")),
                     Integer.parseInt (rs.getString ("deviceID"))
@@ -189,7 +195,7 @@ public class AppointmentController
     public List<Appointment> getAllAppointments () throws SQLException
     {
         List<Appointment> appointments = new ArrayList<>();
-        String sql = "SELECT * FROM appointments ";
+        String sql = "SELECT * FROM appointments";
         
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -198,11 +204,11 @@ public class AppointmentController
             while (rs.next ())
             {
                 Appointment appointment = new Appointment(
-                    Integer.parseInt (rs.getString ("customerCode")),
-                    Integer.parseInt (rs.getString ("technicianID")),
+                    rs.getString ("customerCode"),
+                    rs.getString ("technicianID"),
                     rs.getString ("serviceStatus"),
                     rs.getString ("dateAndTime"),
-                    Integer.parseInt (rs.getString ("invoiceNumber")),
+                    rs.getString ("invoiceNumber"),
                     rs.getString ("paymentStatus"),
                     Double.parseDouble (rs.getString ("amountPaid")),
                     Integer.parseInt (rs.getString ("deviceID"))
@@ -213,21 +219,21 @@ public class AppointmentController
         return appointments;
     }
     
-    public Appointment getAppointmentByInvoiceNumber (int invoiceNumber) throws SQLException
+    public Appointment getAppointmentByInvoiceNumber (String invoiceNumber) throws SQLException
     {
         String sql = "SELECT * FROM appointments WHERE invoiceNumber = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, invoiceNumber);
+            pstmt.setString(1, invoiceNumber);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return new Appointment(
-                        Integer.parseInt (rs.getString ("customerCode")),
-                        Integer.parseInt (rs.getString ("technicianID")),
+                        rs.getString ("customerCode"),
+                        rs.getString ("technicianID"),
                         rs.getString ("serviceStatus"),
                         rs.getString ("dateAndTime"),
-                        Integer.parseInt (rs.getString ("invoiceNumber")),
+                        rs.getString ("invoiceNumber"),
                         rs.getString ("paymentStatus"),
                         Double.parseDouble (rs.getString ("amountPaid")),
                         Integer.parseInt (rs.getString ("deviceID"))
