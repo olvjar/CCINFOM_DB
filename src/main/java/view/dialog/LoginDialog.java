@@ -4,6 +4,7 @@ import controller.CustomerController;
 import controller.TechnicianController;
 import java.awt.*;
 import javax.swing.*;
+import model.service.CustomerService;
 
 public class LoginDialog extends JDialog {
 
@@ -13,7 +14,8 @@ public class LoginDialog extends JDialog {
     private boolean isCustomer;
     private boolean authenticated = false;
     private String authenticatedId;
-    private CustomerController customerController = new CustomerController();
+    private CustomerService customerService = new CustomerService();
+    private CustomerController customerController = new CustomerController(customerService);
     private TechnicianController technicianController =
         new TechnicianController();
 
