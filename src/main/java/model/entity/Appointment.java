@@ -11,9 +11,9 @@ public class Appointment {
     private double amountPaid;
     private int deviceID;
    
-    public Appointment (String customerCode, String technicianID, 
+    public Appointment (int customerCode, int technicianID, 
                         String serviceStatus, String dateAndTime,
-                        String invoiceNumber, String paymentStatus, 
+                        int invoiceNumber, String paymentStatus, 
                         double amountPaid, int deviceID)
     {
         this.customerCode = customerCode;
@@ -26,12 +26,12 @@ public class Appointment {
     }
     
     // Getters
-    public String getCustomerCode ()
+    public int getCustomerCode ()
     {
         return customerCode;
     }
     
-    public String getTechnicianID ()
+    public int getTechnicianID ()
     {
         return technicianID;
     }
@@ -46,7 +46,7 @@ public class Appointment {
         return dateAndTime;
     }
 
-    public String getInvoiceNumber ()
+    public int getInvoiceNumber ()
     {
         return invoiceNumber;
     }
