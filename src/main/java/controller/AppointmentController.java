@@ -94,7 +94,7 @@ public class AppointmentController
         Appointment existingAppointment = getAppointmentByInvoiceID (appointment.getInvoiceID ());
         if (existingAppointment == null)
         {
-            throw new IllegalArgumenException ("Appointment not found.");
+            throw new IllegalArgumentException ("Appointment not found.");
         }
         
         // Deleteeee
