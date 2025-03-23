@@ -1,3 +1,9 @@
+/*
+    Note: I think I should prolly make add appointment check if 
+    the customer, technician, and device exist. But for now haven't added
+    'cause our technician and device controller are also blank for now.
+*/
+
 package controller;
 
 import model.entity.Appointment;
