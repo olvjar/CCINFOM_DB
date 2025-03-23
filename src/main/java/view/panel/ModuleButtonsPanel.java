@@ -52,7 +52,7 @@ public class ModuleButtonsPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Inventory Management module is under development")
         );
         buttons[3].addActionListener(e -> 
-            JOptionPane.showMessageDialog(this, "Appointment Management module is under development")
+            new AppointmentManagementFrame().setVisible(true)
         );
     }
 
