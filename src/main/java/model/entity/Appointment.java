@@ -2,18 +2,18 @@ package model.entity;
 
 public class Appointment {
 
-    private int customerCode;
-    private int technicianID;
+    private String customerCode;
+    private String technicianID;
     private String serviceStatus;
     private String dateAndTime;
-    private int invoiceNumber;
+    private String invoiceNumber;
     private String paymentStatus;
     private double amountPaid;
     private int deviceID;
    
-    public Appointment (int customerCode, int technicianID, 
+    public Appointment (String customerCode, String technicianID, 
                         String serviceStatus, String dateAndTime,
-                        int invoiceNumber, String paymentStatus, 
+                        String invoiceNumber, String paymentStatus, 
                         double amountPaid, int deviceID)
     {
         this.customerCode = customerCode;
@@ -26,12 +26,12 @@ public class Appointment {
     }
     
     // Getters
-    public int getCustomerCode ()
+    public String getCustomerCode ()
     {
         return customerCode;
     }
     
-    public int getTechnicianID ()
+    public String getTechnicianID ()
     {
         return technicianID;
     }
@@ -46,7 +46,7 @@ public class Appointment {
         return dateAndTime;
     }
 
-    public int getInvoiceNumber ()
+    public String getInvoiceNumber ()
     {
         return invoiceNumber;
     }
