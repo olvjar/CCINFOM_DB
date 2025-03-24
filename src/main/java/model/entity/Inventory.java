@@ -6,6 +6,7 @@ public class Inventory {
     private int quantityInStock;
     private String status;
 
+    // Constructor
     public Inventory(String productCode, String productName, int quantityInStock, String status) {
         this.productCode = productCode;
         this.productName = productName;
@@ -13,33 +14,34 @@ public class Inventory {
         this.status = status;
     }
 
-    // Getters and setters
+    // Getters
     public String getProductCode() {
         return productCode;
-    }
-
-    public void setProductCode(String productCode) {
-        this.productCode = productCode;
     }
 
     public String getProductName() {
         return productName;
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
     public int getQuantityInStock() {
         return quantityInStock;
     }
 
-    public void setQuantityInStock(int quantityInStock) {
-        this.quantityInStock = quantityInStock;
-    }
-
     public String getStatus() {
         return status;
+    }
+
+    // Setters
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public void setQuantityInStock(int quantityInStock) {
+        this.quantityInStock = quantityInStock;
     }
 
     public void setStatus(String status) {
