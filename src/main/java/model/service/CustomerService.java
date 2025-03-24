@@ -229,7 +229,8 @@ public class CustomerService {
         List<String[]> appointments = new ArrayList<>();
         String sql = "SELECT a.invoiceNumber, a.dateAndTime, a.serviceStatus, a.paymentStatus, " +
                     "d.deviceType, d.brand, d.model, " +
-                    "CONCAT(t.firstName, ' ', t.lastName) as technicianName " +
+                    "CONCAT(t.firstName, ' ', t.lastName) as technicianName, " +
+                    "a.amountPaid " +
                     "FROM appointments a " +
                     "LEFT JOIN devices d ON a.deviceID = d.deviceID " +
                     "LEFT JOIN technicians t ON a.technicianID = t.technicianID " +
@@ -243,32 +244,39 @@ public class CustomerService {
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                String deviceInfo = rs.getString("deviceType");
-                if (deviceInfo != null) {
-                    deviceInfo += " - " + rs.getString("brand") + " " + rs.getString("model");
-                } else {
-                    deviceInfo = "No device specified";
-                }
-                
-                String technicianName = rs.getString("technicianName");
-                if (technicianName != null) {
-                    technicianName = technicianName;
-                } else {
-                    technicianName = "Not assigned";
-                }
-                
                 String[] appointment = {
                     String.valueOf(rs.getInt("invoiceNumber")),
                     rs.getTimestamp("dateAndTime").toString(),
                     rs.getString("serviceStatus"),
                     rs.getString("paymentStatus"),
-                    deviceInfo,
-                    technicianName
+                    formatDeviceInfo(rs),
+                    formatTechnicianName(rs),
+                    String.format("%.2f", rs.getDouble("amountPaid"))
                 };
                 appointments.add(appointment);
             }
         }
         return appointments;
+    }
+
+    private String formatDeviceInfo(ResultSet rs) throws SQLException {
+        String deviceInfo = rs.getString("deviceType");
+        if (deviceInfo != null) {
+            deviceInfo += " - " + rs.getString("brand") + " " + rs.getString("model");
+        } else {
+            deviceInfo = "No device specified";
+        }
+        return deviceInfo;
+    }
+
+    private String formatTechnicianName(ResultSet rs) throws SQLException {
+        String technicianName = rs.getString("technicianName");
+        if (technicianName != null) {
+            technicianName = technicianName;
+        } else {
+            technicianName = "Not assigned";
+        }
+        return technicianName;
     }
 
     public String validateCustomer(String firstName, String lastName) throws SQLException {

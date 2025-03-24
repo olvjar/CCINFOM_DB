@@ -390,8 +390,8 @@ public class CustomerView extends JFrame {
                 return;
             }
 
-            // status table
-            String[] columnNames = {"Invoice #", "Date & Time", "Service Status", "Payment Status", "Device", "Technician"};
+            // status table - Added Amount Paid column
+            String[] columnNames = {"Invoice #", "Date & Time", "Service Status", "Payment Status", "Device", "Technician", "Amount Charge"};
             Object[][] data = activeAppointments.toArray(new Object[0][]);
 
             JTable table = new JTable(data, columnNames);
@@ -421,12 +421,14 @@ public class CustomerView extends JFrame {
                 }
             });
 
+            // Set column widths
             table.getColumnModel().getColumn(0).setPreferredWidth(70);   // Invoice
             table.getColumnModel().getColumn(1).setPreferredWidth(150);  // Date
-            table.getColumnModel().getColumn(2).setPreferredWidth(100);  // Status
-            table.getColumnModel().getColumn(3).setPreferredWidth(200);  // Device
-            table.getColumnModel().getColumn(4).setPreferredWidth(150);  // Technician
-            table.getColumnModel().getColumn(5).setPreferredWidth(100);  // Payment
+            table.getColumnModel().getColumn(2).setPreferredWidth(100);  // Service Status
+            table.getColumnModel().getColumn(3).setPreferredWidth(200);  // Payment Status
+            table.getColumnModel().getColumn(4).setPreferredWidth(150);  // Device
+            table.getColumnModel().getColumn(5).setPreferredWidth(100);  // Technician
+            table.getColumnModel().getColumn(6).setPreferredWidth(100);  // Amount Paid
 
             JScrollPane scrollPane = new JScrollPane(table);
             scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
