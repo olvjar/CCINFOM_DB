@@ -150,7 +150,7 @@ public class TechnicianManagementFrame extends JFrame {
     public JButton getViewAppointmentsButton() { return viewAppointmentsButton; }
     public JButton getSearchButton() { return searchButton; }
     public JTextField getSearchField() { return searchField; }
-    public String getSearchCriteria() { return (String) searchCriteria.getSelectedItem(); }
+    public String getSearchCriteria() { return searchCriteria.getSelectedItem().toString(); }
     
     public Technician getTechnicianFromFields() {
         return new Technician(
@@ -271,6 +271,21 @@ public class TechnicianManagementFrame extends JFrame {
             case "COMPLETED": return new Color(0, 128, 0);
             case "CANCELLED": return new Color(255, 0, 0);
             default: return Color.BLACK;
+        }
+    }
+
+    public void updateTechnicianTable(List<Technician> technicians) {
+        tableModel.setRowCount(0);
+        for (Technician tech : technicians) {
+            Object[] row = {
+                tech.getTechnicianID(),
+                tech.getFirstName(),
+                tech.getLastName(),
+                tech.getContactNumber(),
+                tech.getAddress(),
+                tech.getAvailability()
+            };
+            tableModel.addRow(row);
         }
     }
 }
