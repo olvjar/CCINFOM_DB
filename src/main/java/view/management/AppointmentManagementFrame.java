@@ -299,6 +299,7 @@ public class AppointmentManagementFrame extends JFrame {
                 appointment.getCustomerCode (),
                 appointment.getTechnicianID (),
                 appointment.getServiceStatus (),
+                appointment.getDateAndTime (),
                 appointment.getInvoiceNumber (),
                 appointment.getPaymentStatus (),
                 appointment.getAmountPaid (),
