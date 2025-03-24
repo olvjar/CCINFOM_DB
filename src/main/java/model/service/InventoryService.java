@@ -98,10 +98,10 @@ public class InventoryService {
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 inventoryList.add(new Inventory(
-                    String.valueOf(rs.getInt("productCode")),
-                    rs.getString("productName"),
-                    rs.getInt("quantityInStock"),
-                    rs.getString("productStatus")
+                        String.valueOf(rs.getInt("productCode")),
+                        rs.getString("productName"),
+                        rs.getInt("quantityInStock"),
+                        rs.getString("productStatus")
                 ));
             }
         } catch (SQLException e) {
@@ -136,10 +136,10 @@ public class InventoryService {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 inventoryList.add(new Inventory(
-                    String.valueOf(rs.getInt("productCode")),
-                    rs.getString("productName"),
-                    rs.getInt("quantityInStock"),
-                    rs.getString("productStatus")
+                        String.valueOf(rs.getInt("productCode")),
+                        rs.getString("productName"),
+                        rs.getInt("quantityInStock"),
+                        rs.getString("productStatus")
                 ));
             }
         } catch (SQLException e) {
@@ -164,5 +164,36 @@ public class InventoryService {
             System.err.println("Error generating product code: " + e.getMessage());
             throw e;
         }
+    }
+
+    public List<Map<String, Object>> getInventoryUsageReport(int year, int month) throws SQLException {
+        List<Map<String, Object>> reportData = new ArrayList<>();
+        String sql = "SELECT i.productCode, i.productName, SUM(u.quantityUsed) AS totalUsed, " +
+                "i.priceEach, SUM(u.quantityUsed * i.priceEach) AS totalCost " +
+                "FROM inventory i " +
+                "JOIN inventory_usage u ON i.productCode = u.productCode " +
+                "WHERE YEAR(u.usageDate) = ? " +
+                (month > 0 ? "AND MONTH(u.usageDate) = ? " : "") +
+                "GROUP BY i.productCode, i.productName, i.priceEach " +
+                "ORDER BY totalUsed DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, year);
+            if (month > 0) pstmt.setInt(2, month);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("productCode", rs.getInt("productCode"));
+                    row.put("productName", rs.getString("productName"));
+                    row.put("totalUsed", rs.getInt("totalUsed"));
+                    row.put("priceEach", rs.getDouble("priceEach"));
+                    row.put("totalCost", rs.getDouble("totalCost"));
+                    reportData.add(row);
+                }
+            }
+        }
+        return reportData;
     }
 }
