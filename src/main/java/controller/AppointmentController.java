@@ -1,5 +1,7 @@
 package controller;
 
+import model.entity.Customer;
+import model.entity.Technician;
 import model.entity.Appointment;
 import model.service.AppointmentService;
 import java.sql.SQLException;
@@ -35,6 +37,16 @@ public class AppointmentController
 
     public Appointment getAppointmentByInvoiceNumber(int invoiceNumber) throws SQLException
     {
-        return appointmentService.getAppointmentByInvoiceNumber(invoiceNumber);
+        return appointmentService.getAppointmentByInvoiceNumber (invoiceNumber);
+    }
+    
+    public Customer getCustomerByCode (String customerCode) throws SQLException
+    {
+        return appointmentService.getCustomerByCode (customerCode);
+    }
+    
+    public Technician getTechnicianByID (int technicianID) throws SQLException
+    {
+        return appointmentService.getTechnicianByID (technicianID);
     }
 }
