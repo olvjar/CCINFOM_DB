@@ -35,7 +35,7 @@ CREATE TABLE technicians (
 CREATE TABLE inventory (
 	productCode INT NOT NULL,
     productName VARCHAR(100) NOT NULL,
-    quantity INT NOT NULL,
+    quantityInStock INT NOT NULL,
     productStatus VARCHAR(100),
     CONSTRAINT product_PK PRIMARY KEY (productCode)
 );
