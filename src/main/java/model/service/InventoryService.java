@@ -1,5 +1,7 @@
 package model.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import model.entity.Inventory;
 import util.DatabaseConnection;
 import java.sql.*;
