@@ -98,11 +98,11 @@ public class InventoryService {
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 inventoryList.add(new Inventory(
-                        rs.getInt("productCode")),
-                        rs.getString("productName"),
-                        rs.getInt("quantityInStock"),
-                        rs.getString("productStatus")
-                );
+                    String.valueOf(rs.getInt("productCode")),
+                    rs.getString("productName"),
+                    rs.getInt("quantityInStock"),
+                    rs.getString("productStatus")
+                ));
             }
         } catch (SQLException e) {
             System.err.println("Error retrieving inventory items: " + e.getMessage());
@@ -136,11 +136,11 @@ public class InventoryService {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 inventoryList.add(new Inventory(
-                        rs.getInt("productCode")),
-                        rs.getString("productName"),
-                        rs.getInt("quantityInStock"),
-                        rs.getString("productStatus")
-                );
+                    String.valueOf(rs.getInt("productCode")),
+                    rs.getString("productName"),
+                    rs.getInt("quantityInStock"),
+                    rs.getString("productStatus")
+                ));
             }
         } catch (SQLException e) {
             System.err.println("Error searching inventory items: " + e.getMessage());
