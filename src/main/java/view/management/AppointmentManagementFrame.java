@@ -1,5 +1,7 @@
 package view.management;
 
+import model.entity.Customer;
+import controller.CustomerController;
 import model.entity.Appointment;
 import controller.AppointmentController;
 import javax.swing.*;
@@ -13,13 +15,14 @@ public class AppointmentManagementFrame extends JFrame {
     private JTable appointmentTable;
     private DefaultTableModel tableModel;
     private JTextField customerCodeField, technicianIDField, serviceStatusField, dateAndTimeField, invoiceNumberField, paymentStatusField, amountPaidField, deviceIDField;
-    private JButton addButton, updateButton, deleteButton;
+    private JButton addButton, updateButton, deleteButton, viewCustomerButton, viewTechnicianButton;
     private AppointmentController appointmentController = new AppointmentController();
+    private CustomerController customerController = new CustomerController();
 
     public AppointmentManagementFrame() 
     {
         setTitle("Appointment Management");
-        setSize(1000, 600);
+        setSize(1000, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         initComponents();
@@ -126,16 +129,20 @@ public class AppointmentManagementFrame extends JFrame {
         inputPanel.add (deviceIDField);
 
         // button panel
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 5, 5));
         buttonPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
 
         addButton = new JButton("Add Appointment");
         updateButton = new JButton("Update Appointment");
         deleteButton = new JButton("Delete Appointment");
+        viewCustomerButton = new JButton ("View Customer");
+        viewTechnicianButton = new JButton ("View Technician");
 
         buttonPanel.add(addButton);
         buttonPanel.add(updateButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add (viewCustomerButton);
+        buttonPanel.add (viewTechnicianButton);
         
         // exit button
         JPanel exitPanel = new JPanel(new GridLayout(1, 1, 5, 5));
@@ -164,6 +171,8 @@ public class AppointmentManagementFrame extends JFrame {
         addButton.addActionListener(e -> addAppointment());
         updateButton.addActionListener(e -> updateAppointment());
         deleteButton.addActionListener(e -> deleteAppointment());
+        viewCustomerButton.addActionListener (e -> viewCustomer ());
+        viewTechnicianButton.addActionListener (e -> viewTechnician ());
         exitButton.addActionListener(e -> dispose());
 
         // table selection listener
@@ -307,5 +316,82 @@ public class AppointmentManagementFrame extends JFrame {
             };
             tableModel.addRow(row);
         }
+    }
+    
+    
+    private void viewCustomer () 
+    {
+        int selectedRow = appointmentTable.getSelectedRow ();
+        if (selectedRow == -1)
+        {
+            JOptionPane.showMessageDialog(this, "Please select an appointment to view customer.");
+            return;
+        }
+        
+        String customerCode = String.valueOf (tableModel.getValueAt (selectedRow, 0));
+        
+        JDialog customerDialog = new JDialog (this, "Customer Record for customer code " + customerCode, true);
+        customerDialog.setSize (800, 400);
+        
+        String[] columns = {
+            "Customer Code",
+            "Last Name",
+            "First Name",
+            "Contact Number",
+            "Address"
+        };
+        DefaultTableModel customerModel = new DefaultTableModel (columns, 0)
+        {
+            @Override
+            public boolean isCellEditable (int row, int column)
+            {
+                return false;
+            }
+        };
+        JTable customerTable = new JTable (customerModel);
+        
+        customerTable.getColumnModel().getColumn(0).setPreferredWidth (100);
+        customerTable.getColumnModel().getColumn(1).setPreferredWidth (100);
+        customerTable.getColumnModel().getColumn(2).setPreferredWidth (100);
+        customerTable.getColumnModel().getColumn(3).setPreferredWidth (100);
+        customerTable.getColumnModel().getColumn(4).setPreferredWidth (100);
+        
+        try
+        {
+            Customer currentCustomer = customerController.getCustomerByCode (customerCode);
+            String[] customerInfo = {currentCustomer.getCustomerCode (),
+                                    currentCustomer.getLastName (),
+                                    currentCustomer.getFirstName (),
+                                    currentCustomer.getContactNumber (),
+                                    currentCustomer.getAddress ()};
+            customerModel.addRow (customerInfo);
+        }
+        catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog (this, "Error loading customer." + e.getMessage ());
+        }
+        
+        // Create main panel with border layout
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // Add table in the center
+        mainPanel.add(new JScrollPane(customerTable), BorderLayout.CENTER);
+        
+        // Add close button at the bottom
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> customerDialog.dispose());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(closeButton);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        customerDialog.add(mainPanel);
+        customerDialog.setLocationRelativeTo(this);
+        customerDialog.setVisible(true);
+    }
+    
+    private void viewTechnician ()
+    {
+        
     }
 } 
