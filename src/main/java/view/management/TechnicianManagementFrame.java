@@ -7,6 +7,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.List;
+import java.sql.SQLException;
+import model.entity.Customer;
+import controller.CustomerController;
+import model.service.CustomerService;
 
 public class TechnicianManagementFrame extends JFrame {
     private JTable technicianTable;
@@ -17,9 +21,11 @@ public class TechnicianManagementFrame extends JFrame {
     private JComboBox<String> searchCriteria;
     private JButton addButton, updateButton, deleteButton, viewAppointmentsButton, searchButton;
     private TechnicianController technicianController;
+    private CustomerController customerController;
 
     public TechnicianManagementFrame(TechnicianController controller) {
         this.technicianController = controller;
+        this.customerController = new CustomerController(new CustomerService());
         setTitle("Technician Management");
         setSize(1000, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -242,9 +248,22 @@ public class TechnicianManagementFrame extends JFrame {
         };
         appointmentsTable.getColumnModel().getColumn(2).setCellRenderer(statusRenderer);
 
-        // Load appointments
-        for (String[] appointment : appointments) {
-            appointmentsModel.addRow(appointment);
+        // Load appointments 
+        try {
+            for (String[] appointment : appointments) {
+                String[] rowData = appointment.clone();
+                String customerCode = appointment[5];
+                Customer customer = customerController.getCustomerByCode(customerCode);
+                if (customer != null) {
+                    rowData[5] = customer.getFullName();
+                }
+                appointmentsModel.addRow(rowData);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading customer names: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
 
         // Main panel

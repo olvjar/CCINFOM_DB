@@ -131,11 +131,13 @@ public class TechnicianService {
     public List<String[]> getTechnicianAppointments(int technicianID) throws SQLException {
         String sql = "SELECT a.invoiceNumber, a.dateAndTime, a.serviceStatus, a.paymentStatus, "
                 + "d.deviceType, d.brand, d.model, "
-                + "c.firstName || ' ' || c.lastName AS customerName "
+                + "CONCAT(c.firstName, ' ', c.lastName) AS customerName "
                 + "FROM appointments a "
                 + "LEFT JOIN devices d ON a.deviceID = d.deviceID "
                 + "LEFT JOIN customers c ON a.customerCode = c.customerCode "
-                + "WHERE a.technicianID = ?";
+                + "WHERE a.technicianID = ? "
+                + "ORDER BY a.dateAndTime DESC";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, technicianID);
@@ -153,7 +155,7 @@ public class TechnicianService {
                         rs.getString("serviceStatus"),
                         rs.getString("paymentStatus"),
                         deviceInfo,
-                        rs.getString("customerName")
+                        rs.getString("customerName") != null ? rs.getString("customerName") : "No customer"
                 });
             }
             return appointments;
