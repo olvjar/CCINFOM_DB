@@ -1,0 +1,410 @@
+package view.dialog;
+
+import model.entity.Device;
+import model.entity.Appointment;
+import model.entity.Technician;
+import model.service.DeviceService;
+import model.service.AppointmentService;
+import model.service.TechnicianService;
+import controller.DeviceController;
+import controller.AppointmentController;
+import controller.TechnicianController;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.util.Date;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ScheduleRepairDialog extends JDialog {
+    // Fields for device section
+    private final int customerCode;
+    private final List<Device> devices;
+    private JComboBox<Device> deviceCombo;
+    private JPanel deviceDetailsPanel;
+    private JTextField typeField, brandField, modelField, serialField;
+    private JTextArea descriptionArea;
+    private boolean isNewDevice = false;
+    
+    // Fields for schedule section
+    private JComboBox<Technician> technicianCombo;
+    
+    // Controllers
+    private final DeviceController deviceController;
+    private final AppointmentController appointmentController;
+    private final TechnicianController technicianController;
+
+    // UI Components
+    private JLabel typeValueLabel;
+    private JLabel brandValueLabel;
+    private JLabel modelValueLabel;
+    private JLabel serialValueLabel;
+    private JTextArea existingDescriptionArea;
+
+    public ScheduleRepairDialog(JFrame parent, int customerCode, List<Device> devices) {
+        super(parent, "Schedule Repair", true);
+        this.customerCode = customerCode;
+        this.devices = devices;
+        
+        // Initialize controllers
+        this.deviceController = new DeviceController(new DeviceService());
+        this.appointmentController = new AppointmentController(new AppointmentService());
+        this.technicianController = new TechnicianController(new TechnicianService());
+        
+        setupDialog();
+        initializeComponents();
+        loadTechnicians();
+    }
+
+    private void setupDialog() {
+        setSize(500, 700);
+        setLocationRelativeTo(getOwner());
+        setLayout(new BorderLayout(10, 10));
+    }
+
+    private void initializeComponents() {
+        JPanel mainPanel = createMainPanel();
+        JScrollPane scrollPane = new JScrollPane(mainPanel);
+        add(scrollPane, BorderLayout.CENTER);
+        add(createButtonPanel(), BorderLayout.SOUTH);
+    }
+
+    private JPanel createMainPanel() {
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        mainPanel.add(createDeviceSection());
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        mainPanel.add(createScheduleSection());
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        return mainPanel;
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton scheduleButton = new JButton("Schedule Repair");
+        JButton cancelButton = new JButton("Cancel");
+        
+        scheduleButton.addActionListener(e -> scheduleRepair());
+        cancelButton.addActionListener(e -> dispose());
+        
+        buttonPanel.add(scheduleButton);
+        buttonPanel.add(cancelButton);
+        return buttonPanel;
+    }
+
+    private JPanel createDeviceSection() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Device Information"));
+        
+        JRadioButton existingDeviceRadio = new JRadioButton("Select Existing Device");
+        JRadioButton newDeviceRadio = new JRadioButton("Add New Device");
+        ButtonGroup group = new ButtonGroup();
+        group.add(existingDeviceRadio);
+        group.add(newDeviceRadio);
+        
+        JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        radioPanel.add(existingDeviceRadio);
+        radioPanel.add(newDeviceRadio);
+        
+        JPanel cardPanel = new JPanel(new CardLayout());
+        
+        JPanel existingDevicePanel = new JPanel(new BorderLayout(5, 5));
+        deviceCombo = new JComboBox<>(devices.toArray(new Device[0]));
+        deviceCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, 
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                Device device = (Device) value;
+                String text = device.getDeviceType() + " - " + device.getBrand() + " " + device.getModel();
+                return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
+            }
+        });
+
+        JPanel existingDetailsPanel = new JPanel(new GridBagLayout());
+        existingDetailsPanel.setBorder(BorderFactory.createTitledBorder("Device Details"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(2, 5, 2, 5);
+
+        JLabel typeLabel = new JLabel("Type:");
+        JLabel brandLabel = new JLabel("Brand:");
+        JLabel modelLabel = new JLabel("Model:");
+        JLabel serialLabel = new JLabel("Serial Number:");
+        
+        // Initialize the labels
+        typeValueLabel = new JLabel();
+        brandValueLabel = new JLabel();
+        modelValueLabel = new JLabel();
+        serialValueLabel = new JLabel();
+        existingDescriptionArea = new JTextArea(3, 20);
+        existingDescriptionArea.setLineWrap(true);
+        existingDescriptionArea.setWrapStyleWord(true);
+
+        addFormField(existingDetailsPanel, "Type:", typeValueLabel, gbc, 0);
+        addFormField(existingDetailsPanel, "Brand:", brandValueLabel, gbc, 1);
+        addFormField(existingDetailsPanel, "Model:", modelValueLabel, gbc, 2);
+        addFormField(existingDetailsPanel, "Serial Number:", serialValueLabel, gbc, 3);
+
+        JPanel existingProblemPanel = new JPanel(new BorderLayout(5, 5));
+        existingProblemPanel.setBorder(BorderFactory.createTitledBorder("Problem Description"));
+        existingDescriptionArea = new JTextArea(3, 20);
+        existingDescriptionArea.setLineWrap(true);
+        existingDescriptionArea.setWrapStyleWord(true);
+        existingProblemPanel.add(new JScrollPane(existingDescriptionArea), BorderLayout.CENTER);
+
+        // Initially set the descriptionArea reference to existingDescriptionArea
+        descriptionArea = existingDescriptionArea;
+
+        setupDeviceComboListener();
+
+        if (devices.size() > 0) {
+            Device initialDevice = (Device) deviceCombo.getSelectedItem();
+            if (initialDevice != null) {
+                typeValueLabel.setText(initialDevice.getDeviceType());
+                brandValueLabel.setText(initialDevice.getBrand());
+                modelValueLabel.setText(initialDevice.getModel());
+                serialValueLabel.setText(initialDevice.getSerialNumber());
+                existingDescriptionArea.setText(initialDevice.getDescription());
+            }
+        }
+
+        JPanel existingDeviceContent = new JPanel(new BorderLayout(5, 5));
+        existingDeviceContent.add(deviceCombo, BorderLayout.NORTH);
+        existingDeviceContent.add(existingDetailsPanel, BorderLayout.CENTER);
+        existingDeviceContent.add(existingProblemPanel, BorderLayout.SOUTH);
+        existingDevicePanel.add(existingDeviceContent, BorderLayout.CENTER);
+
+        deviceDetailsPanel = new JPanel(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(2, 5, 2, 5);
+        
+        typeField = new JTextField(20);
+        brandField = new JTextField(20);
+        modelField = new JTextField(20);
+        serialField = new JTextField(20);
+        descriptionArea = new JTextArea(3, 20);
+        descriptionArea.setLineWrap(true);
+        
+        addFormField(deviceDetailsPanel, "Type:", typeField, gbc, 0);
+        addFormField(deviceDetailsPanel, "Brand:", brandField, gbc, 1);
+        addFormField(deviceDetailsPanel, "Model:", modelField, gbc, 2);
+        addFormField(deviceDetailsPanel, "Serial Number:", serialField, gbc, 3);
+        addFormField(deviceDetailsPanel, "Problem Description:", new JScrollPane(descriptionArea), gbc, 4);
+
+        cardPanel.add(existingDevicePanel, "existing");
+        cardPanel.add(deviceDetailsPanel, "new");
+        
+        existingDeviceRadio.addActionListener(e -> {
+            CardLayout cl = (CardLayout) cardPanel.getLayout();
+            cl.show(cardPanel, "existing");
+            isNewDevice = false;
+            descriptionArea = existingDescriptionArea;  // Switch to existing description area
+        });
+        
+        newDeviceRadio.addActionListener(e -> {
+            CardLayout cl = (CardLayout) cardPanel.getLayout();
+            cl.show(cardPanel, "new");
+            isNewDevice = true;
+            descriptionArea = ((JTextArea) ((JScrollPane) deviceDetailsPanel.getComponent(9)).getViewport().getView());
+        });
+        
+        existingDeviceRadio.setSelected(true);
+        
+        panel.add(radioPanel, BorderLayout.NORTH);
+        panel.add(cardPanel, BorderLayout.CENTER);
+        
+        return panel;
+    }
+
+    private JPanel createScheduleSection() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Schedule"));
+        
+        JPanel schedulePanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(2, 5, 2, 5);
+        
+        JLabel dateTimeLabel = new JLabel(getCurrentDateTime());
+        setupTechnicianCombo();
+        
+        addFormField(schedulePanel, "Schedule Time:", dateTimeLabel, gbc, 0);
+        addFormField(schedulePanel, "Technician:", technicianCombo, gbc, 1);
+        
+        panel.add(schedulePanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private String getCurrentDateTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(new Date());
+    }
+
+    private void setupTechnicianCombo() {
+        technicianCombo = new JComboBox<>();
+        technicianCombo.setRenderer((ListCellRenderer<Object>)createTechnicianRenderer());
+    }
+
+    private ListCellRenderer<Object> createTechnicianRenderer() {
+        return new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, 
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof Technician) {
+                    Technician tech = (Technician) value;
+                    String text = String.format("%s %s (ID: %d)", 
+                        tech.getFirstName(), 
+                        tech.getLastName(), 
+                        tech.getTechnicianID());
+                    return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        };
+    }
+
+    private void loadTechnicians() {
+        try {
+            List<Technician> availableTechnicians = technicianController.getAllTechnicians().stream()
+                .filter(tech -> "Available".equalsIgnoreCase(tech.getAvailability()))
+                .collect(Collectors.toList());
+            
+            if (availableTechnicians.isEmpty()) {
+                showWarning("No technicians are currently available. Please try again later.");
+                return;
+            }
+
+            technicianCombo.setModel(new DefaultComboBoxModel<>(
+                availableTechnicians.toArray(new Technician[0])
+            ));
+        } catch (SQLException e) {
+            showError("Error loading technicians: " + e.getMessage());
+        }
+    }
+
+    private void scheduleRepair() {
+        try {
+            validateInputs();
+            Device device = isNewDevice ? createNewDevice() : updateExistingDevice();
+            createAppointment(device);
+            showSuccess("Repair appointment scheduled successfully!");
+            dispose();
+        } catch (Exception ex) {
+            showError(ex.getMessage());
+        }
+    }
+
+    private Device updateExistingDevice() throws SQLException {
+        Device selectedDevice = (Device) deviceCombo.getSelectedItem();
+        Device updatedDevice = new Device(
+            selectedDevice.getDeviceId(),
+            selectedDevice.getCustomerCode(),
+            selectedDevice.getDeviceType(),
+            selectedDevice.getBrand(),
+            selectedDevice.getModel(),
+            selectedDevice.getSerialNumber(),
+            existingDescriptionArea.getText().trim()
+        );
+        
+        deviceController.updateDevice(updatedDevice);
+        return updatedDevice;
+    }
+
+    private void createAppointment(Device device) throws SQLException {
+        Technician technician = (Technician) technicianCombo.getSelectedItem();
+        String dateTime = getCurrentDateTime();
+        int invoiceNumber = appointmentController.generateInvoiceNumber();
+        
+        Appointment appointment = new Appointment(
+            customerCode,
+            technician.getTechnicianID(),
+            "Pending",
+            dateTime,
+            invoiceNumber,
+            "Pending",
+            0.0,
+            device.getDeviceId()
+        );
+        
+        appointmentController.addAppointment(appointment);
+    }
+
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message, "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void validateInputs() {
+        if (isNewDevice) {
+            if (typeField.getText().trim().isEmpty() ||
+                brandField.getText().trim().isEmpty() ||
+                modelField.getText().trim().isEmpty() ||
+                serialField.getText().trim().isEmpty() ||
+                descriptionArea.getText().trim().isEmpty()) {
+                throw new IllegalArgumentException("Please fill in all device fields");
+            }
+        } else if (deviceCombo.getSelectedIndex() == -1) {
+            throw new IllegalArgumentException("Please select a device");
+        }
+        
+        if (technicianCombo.getSelectedIndex() == -1) {
+            throw new IllegalArgumentException("Please select a technician");
+        }
+    }
+
+    private Device createNewDevice() throws SQLException {
+        int deviceId = deviceController.generateDeviceId();
+        Device device = new Device(
+            deviceId,
+            customerCode,
+            typeField.getText().trim(),
+            brandField.getText().trim(),
+            modelField.getText().trim(),
+            serialField.getText().trim(),
+            descriptionArea.getText().trim()
+        );
+        
+        deviceController.addDevice(device);
+        return device;
+    }
+
+    private void addFormField(JPanel panel, String label, JComponent field, 
+                            GridBagConstraints gbc, int row) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+        panel.add(new JLabel(label), gbc);
+        
+        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        panel.add(field, gbc);
+    }
+
+    // Update device description when combo box selection changes
+    private void setupDeviceComboListener() {
+        deviceCombo.addActionListener(e -> {
+            Device selectedDevice = (Device) deviceCombo.getSelectedItem();
+            if (selectedDevice != null) {
+                typeValueLabel.setText(selectedDevice.getDeviceType());
+                brandValueLabel.setText(selectedDevice.getBrand());
+                modelValueLabel.setText(selectedDevice.getModel());
+                serialValueLabel.setText(selectedDevice.getSerialNumber());
+                existingDescriptionArea.setText(selectedDevice.getDescription());
+            }
+        });
+    }
+} 

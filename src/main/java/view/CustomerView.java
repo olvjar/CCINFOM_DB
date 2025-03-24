@@ -8,6 +8,8 @@ import model.service.CustomerService;
 import model.service.DeviceService;
 import view.utils.ColorUtils;
 import view.utils.GuiUtils;
+import view.dialog.ScheduleRepairDialog;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -16,6 +18,9 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.stream.Collectors;
 
 public class CustomerView extends JFrame {
     private String customerCode;
@@ -200,27 +205,26 @@ public class CustomerView extends JFrame {
         JPanel panel = new JPanel(new GridLayout(2, 2, 20, 20));
         panel.setBackground(ColorUtils.BACKGROUND);
 
-        panel.add(createEnhancedActionCard("Schedule Repair", 
+        panel.add(createCard("Schedule Repair", 
             "Request a new repair service for your device",
             "📅", this::showScheduleRepair));
             
-        panel.add(createEnhancedActionCard("View Devices", 
+        panel.add(createCard("View Devices", 
             "Manage your registered devices and their history",
             "💻", this::showDevices));
             
-        panel.add(createEnhancedActionCard("Repair History", 
+        panel.add(createCard("Repair History", 
             "View all your past repair records and invoices",
             "📋", this::showRepairHistory));
             
-        panel.add(createEnhancedActionCard("Check Status", 
+        panel.add(createCard("Check Status", 
             "Track the status of your ongoing repairs",
             "🔍", this::checkStatus));
 
         return panel;
     }
 
-    private JPanel createEnhancedActionCard(String title, String description, String icon, Runnable action) {
-        // Create the main card panel with hover effect
+    private JPanel createCard(String title, String description, String icon, Runnable action) {
         JPanel card = new JPanel() {
             {
                 setBackground(ColorUtils.BACKGROUND);
@@ -245,18 +249,15 @@ public class CustomerView extends JFrame {
             new EmptyBorder(25, 25, 25, 25)
         ));
 
-        // Icon
         JLabel iconLabel = new JLabel(icon);
         iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 36));
         iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Title
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(ColorUtils.TEXT_PRIMARY);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Description with proper centering
         JLabel descLabel = new JLabel("<html><div style='text-align: center; width: 100%;'>" + description + "</div></html>");
         descLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         descLabel.setForeground(ColorUtils.TEXT_SECONDARY);
@@ -280,7 +281,6 @@ public class CustomerView extends JFrame {
         button.setFont(new Font("Arial", Font.BOLD, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(ColorUtils.PRIMARY_DARK);
@@ -295,19 +295,24 @@ public class CustomerView extends JFrame {
     private void showRepairHistory() {
         try {
             List<String[]> history = customerController.getCustomerAppointments(customerCode);
-            if (history.isEmpty()) {
+            
+            // Filter only completed and cancelled appointments
+            List<String[]> filteredHistory = history.stream()
+                .filter(app -> app[2].equals("Completed") || app[2].equals("Cancelled"))
+                .collect(Collectors.toList());
+            
+            if (filteredHistory.isEmpty()) {
                 showErrorDialog("No repair history found.");
                 return;
             }
 
-            // Create table model
+            // history table
             String[] columnNames = {"Invoice", "Date", "Status", "Payment", "Device"};
-            Object[][] data = history.toArray(new Object[0][]);
+            Object[][] data = filteredHistory.toArray(new Object[0][]);
 
             JTable table = new JTable(data, columnNames);
             JScrollPane scrollPane = new JScrollPane(table);
 
-            // Show in dialog
             JDialog dialog = new JDialog(this, "Repair History", true);
             dialog.setSize(600, 400);
             dialog.setLocationRelativeTo(this);
@@ -327,7 +332,6 @@ public class CustomerView extends JFrame {
                 return;
             }
 
-            // Create table model
             String[] columnNames = {"Device ID", "Type", "Brand", "Model", "Serial Number"};
             Object[][] data = devices.stream()
                 .map(d -> new Object[]{
@@ -342,7 +346,6 @@ public class CustomerView extends JFrame {
             JTable table = new JTable(data, columnNames);
             JScrollPane scrollPane = new JScrollPane(table);
 
-            // Show in dialog
             JDialog dialog = new JDialog(this, "Your Devices", true);
             dialog.setSize(600, 400);
             dialog.setLocationRelativeTo(this);
@@ -355,14 +358,115 @@ public class CustomerView extends JFrame {
     }
 
     private void showScheduleRepair() {
-        JOptionPane.showMessageDialog(this,
-            "This feature will be available soon!\n\n" +
-            JOptionPane.INFORMATION_MESSAGE);
+        try {
+            List<Device> devices = deviceController.getCustomerDevices(Integer.parseInt(customerCode));
+            
+            ScheduleRepairDialog dialog = new ScheduleRepairDialog(
+                this,  // parent frame
+                Integer.parseInt(customerCode),
+                devices
+            );
+            dialog.setVisible(true);
+            
+        } catch (SQLException ex) {
+            showErrorDialog("Error loading customer data: " + ex.getMessage());
+        }
     }
 
     private void checkStatus() {
-        JOptionPane.showMessageDialog(this,
-            "This feature will be available soon!\n\n" +
-            JOptionPane.INFORMATION_MESSAGE);
+        try {
+            List<String[]> appointments = customerController.getCustomerAppointments(customerCode);
+            
+            // Active appointments
+            List<String[]> activeAppointments = appointments.stream()
+                .filter(app -> app[2].equals("Pending") || app[2].equals("In Progress") || app[2].equals("For Pickup"))
+                .collect(Collectors.toList());
+
+            if (activeAppointments.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "No active repair services found.",
+                    "Status Check",
+                    JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // status table
+            String[] columnNames = {"Invoice #", "Date & Time", "Service Status", "Payment Status", "Device", "Technician"};
+            Object[][] data = activeAppointments.toArray(new Object[0][]);
+
+            JTable table = new JTable(data, columnNames);
+            table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value,
+                        boolean isSelected, boolean hasFocus, int row, int column) {
+                    Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    
+                    if (column == 2) { // Service Status column
+                        String status = value.toString();
+                        switch (status) {
+                            case "Pending":
+                                setForeground(new Color(128, 128, 128)); // Gray
+                                break;
+                            case "In Progress":
+                                setForeground(new Color(0, 0, 255));     // Blue
+                                break;
+                            case "For Pickup":
+                                setForeground(new Color(255, 140, 0));   // Orange
+                                break;
+                        }
+                    } else {
+                        setForeground(table.getForeground());
+                    }
+                    return c;
+                }
+            });
+
+            table.getColumnModel().getColumn(0).setPreferredWidth(70);   // Invoice
+            table.getColumnModel().getColumn(1).setPreferredWidth(150);  // Date
+            table.getColumnModel().getColumn(2).setPreferredWidth(100);  // Status
+            table.getColumnModel().getColumn(3).setPreferredWidth(200);  // Device
+            table.getColumnModel().getColumn(4).setPreferredWidth(150);  // Technician
+            table.getColumnModel().getColumn(5).setPreferredWidth(100);  // Payment
+
+            JScrollPane scrollPane = new JScrollPane(table);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            legendPanel.setBorder(BorderFactory.createTitledBorder("Status Legend"));
+            
+            String[] statuses = {"Pending", "In Progress", "For Pickup"};
+            Color[] colors = {
+                new Color(128, 128, 128),
+                new Color(0, 0, 255),
+                new Color(255, 140, 0)
+            };
+            
+            for (int i = 0; i < statuses.length; i++) {
+                JLabel label = new JLabel(statuses[i]);
+                label.setForeground(colors[i]);
+                label.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+                legendPanel.add(label);
+            }
+
+            JPanel mainPanel = new JPanel(new BorderLayout());
+            mainPanel.add(legendPanel, BorderLayout.NORTH);
+            mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+            JDialog dialog = new JDialog(this, "Repair Status", true);
+            dialog.setSize(800, 400);
+            dialog.setLocationRelativeTo(this);
+            
+            JButton closeButton = new JButton("Close");
+            closeButton.addActionListener(e -> dialog.dispose());
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            buttonPanel.add(closeButton);
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+            dialog.add(mainPanel);
+            dialog.setVisible(true);
+
+        } catch (SQLException ex) {
+            showErrorDialog("Error checking repair status: " + ex.getMessage());
+        }
     }
 } 
