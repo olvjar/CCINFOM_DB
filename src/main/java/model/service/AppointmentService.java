@@ -8,6 +8,7 @@ import java.sql.*;
 import java.util.*;
 
 public class AppointmentService {
+
     // Add appointment.
     public void addAppointment(Appointment appointment) throws SQLException {
         // Validate input.
@@ -265,5 +266,41 @@ public class AppointmentService {
             }
         }
         return null;
+    }
+
+    public int generateInvoiceNumber() throws SQLException {
+        String sql = "SELECT MAX(invoiceNumber) FROM appointments";
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                int lastNumber = rs.getInt(1);
+                return lastNumber + 1;
+            }
+            return 1001; // Start with 1001 if no appointments exist
+        }
+    }
+
+    public List<Technician> getAllTechnicians() throws SQLException {
+        List<Technician> technicians = new ArrayList<>();
+        String sql = "SELECT * FROM technicians";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                Technician technician = new Technician(
+                    rs.getInt("technicianID"),
+                    rs.getString("firstName"),
+                    rs.getString("lastName"),
+                    rs.getString("contactNumber"),
+                    rs.getString("address"),
+                    rs.getString("availability")
+                );
+                technicians.add(technician);
+            }
+        }
+        return technicians;
     }
 } 

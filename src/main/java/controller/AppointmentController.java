@@ -20,10 +20,9 @@ public class AppointmentController {
         this.appointmentService = new AppointmentService();
     }
 
-// Fixed method to return an integer
-public int generateInvoiceNumber() {
-    return (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
-}
+    public int generateInvoiceNumber() throws SQLException {
+        return appointmentService.generateInvoiceNumber();
+    }
 
     
     public void addAppointment(Appointment appointment) throws SQLException {
@@ -59,5 +58,9 @@ public int generateInvoiceNumber() {
     public Technician getTechnicianByID (int technicianID) throws SQLException
     {
         return appointmentService.getTechnicianByID (technicianID);
+    }
+
+    public List<Technician> getAllTechnicians() throws SQLException {
+        return appointmentService.getAllTechnicians();
     }
 }
