@@ -1,5 +1,7 @@
 package view.panel;
 
+import controller.InventoryController;
+import model.service.InventoryService;
 import controller.CustomerController;
 import model.service.CustomerService;
 import view.management.CustomerManagementFrame;
