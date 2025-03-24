@@ -4,6 +4,8 @@ import model.entity.Inventory;
 import controller.InventoryController;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.SwingConstants;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.List;
 public class InventoryManagementFrame extends JFrame {
     private JTable inventoryTable;
     private DefaultTableModel tableModel;
-    private JTextField productCodeField, productNameField, quantityField, statusField;
+    private JTextField productCodeField, productNameField, quantityField, statusField, priceField;
     private JTextField searchField;
     private JComboBox<String> searchCriteria;
     private JButton addButton, updateButton, deleteButton, searchButton;
@@ -60,13 +62,14 @@ public class InventoryManagementFrame extends JFrame {
         searchPanel.add(searchBarPanel);
 
         // Input panel
-        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 5, 5));
         inputPanel.setBorder(BorderFactory.createTitledBorder("Inventory Details"));
 
         productCodeField = new JTextField();
         productNameField = new JTextField();
         quantityField = new JTextField();
         statusField = new JTextField();
+        priceField = new JTextField();
 
         inputPanel.add(new JLabel("Product Code:"));
         inputPanel.add(productCodeField);
@@ -74,6 +77,8 @@ public class InventoryManagementFrame extends JFrame {
         inputPanel.add(productNameField);
         inputPanel.add(new JLabel("Quantity in Stock:"));
         inputPanel.add(quantityField);
+        inputPanel.add(new JLabel("Price (₱):"));
+        inputPanel.add(priceField);
         inputPanel.add(new JLabel("Status:"));
         inputPanel.add(statusField);
 
@@ -108,7 +113,7 @@ public class InventoryManagementFrame extends JFrame {
         leftPanel.add(leftContentPanel, BorderLayout.NORTH);
 
         // Create table
-        String[] columns = {"Product Code", "Product Name", "Quantity", "Status"};
+        String[] columns = {"Product Code", "Product Name", "Quantity", "Price (₱)", "Status"};
         tableModel = new DefaultTableModel(columns, 0);
         inventoryTable = new JTable(tableModel);
         JScrollPane tableScrollPane = new JScrollPane(inventoryTable);
@@ -132,8 +137,25 @@ public class InventoryManagementFrame extends JFrame {
                     productCodeField.setText(tableModel.getValueAt(selectedRow, 0).toString());
                     productNameField.setText(tableModel.getValueAt(selectedRow, 1).toString());
                     quantityField.setText(tableModel.getValueAt(selectedRow, 2).toString());
-                    statusField.setText(tableModel.getValueAt(selectedRow, 3).toString());
+                    priceField.setText(tableModel.getValueAt(selectedRow, 3).toString().replace("₱", ""));
+                    statusField.setText(tableModel.getValueAt(selectedRow, 4).toString());
                 }
+            }
+        });
+
+        inventoryTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            {
+                setHorizontalAlignment(SwingConstants.LEFT);
+            }
+            
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (value != null) {
+                    setText(String.format("₱%.2f", value));
+                }
+                return this;
             }
         });
     }
@@ -207,10 +229,18 @@ public void searchInventoryItems() {
     public String getSearchCriteria() { return (String) searchCriteria.getSelectedItem(); }
 
     public Inventory getInventoryFromFields() {
+        double price = 0.0;
+        try {
+            price = Double.parseDouble(priceField.getText().trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid price format. Please enter a valid number.");
+        }
+        
         return new Inventory(
             productCodeField.getText(),
             productNameField.getText(),
             Integer.parseInt(quantityField.getText()),
+            price,
             statusField.getText()
         );
     }
@@ -225,6 +255,7 @@ public void searchInventoryItems() {
         productCodeField.setText("");
         productNameField.setText("");
         quantityField.setText("");
+        priceField.setText("");
         statusField.setText("");
     }
 
@@ -235,6 +266,7 @@ public void searchInventoryItems() {
                 inventory.getProductCode(),
                 inventory.getProductName(),
                 inventory.getQuantityInStock(),
+                inventory.getPrice(),
                 inventory.getStatus()
             };
             tableModel.addRow(row);

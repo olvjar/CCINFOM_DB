@@ -15,15 +15,14 @@ public class InventoryService {
         if (inventory == null) {
             throw new IllegalArgumentException("Inventory cannot be null.");
         }
-        String sql = "INSERT INTO inventory (productCode, productName, quantityInStock, productStatus) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO inventory (productCode, productName, quantityInStock, productStatus, priceEach) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, inventory.getProductCode());
             pstmt.setString(2, inventory.getProductName());
             pstmt.setInt(3, inventory.getQuantityInStock());
             pstmt.setString(4, inventory.getStatus());
-            pstmt.setDate(5, new java.sql.Date(System.currentTimeMillis()));
-            pstmt.setDouble(6, 0.0);
+            pstmt.setDouble(5, inventory.getPrice());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error adding inventory item: " + e.getMessage());
@@ -36,13 +35,14 @@ public class InventoryService {
         if (inventory == null) {
             throw new IllegalArgumentException("Inventory cannot be null.");
         }
-        String sql = "UPDATE inventory SET productName = ?, quantityInStock = ?, productStatus = ? WHERE productCode = ?";
+        String sql = "UPDATE inventory SET productName = ?, quantityInStock = ?, productStatus = ?, priceEach = ? WHERE productCode = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, inventory.getProductName());
             pstmt.setInt(2, inventory.getQuantityInStock());
             pstmt.setString(3, inventory.getStatus());
-            pstmt.setString(4, inventory.getProductCode());
+            pstmt.setDouble(4, inventory.getPrice());
+            pstmt.setString(5, inventory.getProductCode());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error updating inventory item: " + e.getMessage());
@@ -81,6 +81,7 @@ public class InventoryService {
                         rs.getString("productCode"),
                         rs.getString("productName"),
                         rs.getInt("quantityInStock"),
+                        rs.getDouble("priceEach"),
                         rs.getString("productStatus")
                 );
             }
@@ -103,6 +104,7 @@ public class InventoryService {
                         String.valueOf(rs.getInt("productCode")),
                         rs.getString("productName"),
                         rs.getInt("quantityInStock"),
+                        rs.getDouble("priceEach"),
                         rs.getString("productStatus")
                 ));
             }
@@ -141,6 +143,7 @@ public class InventoryService {
                         String.valueOf(rs.getInt("productCode")),
                         rs.getString("productName"),
                         rs.getInt("quantityInStock"),
+                        rs.getDouble("priceEach"),
                         rs.getString("productStatus")
                 ));
             }
