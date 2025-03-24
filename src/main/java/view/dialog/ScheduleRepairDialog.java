@@ -2,13 +2,10 @@ package view.dialog;
 
 import model.entity.Device;
 import model.entity.Appointment;
-import model.entity.Technician;
 import model.service.DeviceService;
 import model.service.AppointmentService;
-import model.service.TechnicianService;
 import controller.DeviceController;
 import controller.AppointmentController;
-import controller.TechnicianController;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -29,13 +26,9 @@ public class ScheduleRepairDialog extends JDialog {
     private JTextArea descriptionArea;
     private boolean isNewDevice = false;
     
-    // Fields for schedule section
-    private JComboBox<Technician> technicianCombo;
-    
     // Controllers
     private final DeviceController deviceController;
     private final AppointmentController appointmentController;
-    private final TechnicianController technicianController;
 
     // UI Components
     private JLabel typeValueLabel;
@@ -52,11 +45,9 @@ public class ScheduleRepairDialog extends JDialog {
         // Initialize controllers
         this.deviceController = new DeviceController(new DeviceService());
         this.appointmentController = new AppointmentController(new AppointmentService());
-        this.technicianController = new TechnicianController(new TechnicianService());
         
         setupDialog();
         initializeComponents();
-        loadTechnicians();
     }
 
     private void setupDialog() {
@@ -233,10 +224,7 @@ public class ScheduleRepairDialog extends JDialog {
         gbc.insets = new Insets(2, 5, 2, 5);
         
         JLabel dateTimeLabel = new JLabel(getCurrentDateTime());
-        setupTechnicianCombo();
-        
         addFormField(schedulePanel, "Schedule Time:", dateTimeLabel, gbc, 0);
-        addFormField(schedulePanel, "Technician:", technicianCombo, gbc, 1);
         
         panel.add(schedulePanel, BorderLayout.CENTER);
         return panel;
@@ -245,48 +233,6 @@ public class ScheduleRepairDialog extends JDialog {
     private String getCurrentDateTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(new Date());
-    }
-
-    private void setupTechnicianCombo() {
-        technicianCombo = new JComboBox<>();
-        technicianCombo.setRenderer((ListCellRenderer<Object>)createTechnicianRenderer());
-    }
-
-    private ListCellRenderer<Object> createTechnicianRenderer() {
-        return new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, 
-                    int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof Technician) {
-                    Technician tech = (Technician) value;
-                    String text = String.format("%s %s (ID: %d)", 
-                        tech.getFirstName(), 
-                        tech.getLastName(), 
-                        tech.getTechnicianID());
-                    return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
-                }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        };
-    }
-
-    private void loadTechnicians() {
-        try {
-            List<Technician> availableTechnicians = technicianController.getAllTechnicians().stream()
-                .filter(tech -> "Available".equalsIgnoreCase(tech.getAvailability()))
-                .collect(Collectors.toList());
-            
-            if (availableTechnicians.isEmpty()) {
-                showWarning("No technicians are currently available. Please try again later.");
-                return;
-            }
-
-            technicianCombo.setModel(new DefaultComboBoxModel<>(
-                availableTechnicians.toArray(new Technician[0])
-            ));
-        } catch (SQLException e) {
-            showError("Error loading technicians: " + e.getMessage());
-        }
     }
 
     private void scheduleRepair() {
@@ -318,13 +264,13 @@ public class ScheduleRepairDialog extends JDialog {
     }
 
     private void createAppointment(Device device) throws SQLException {
-        Technician technician = (Technician) technicianCombo.getSelectedItem();
         String dateTime = getCurrentDateTime();
         int invoiceNumber = appointmentController.generateInvoiceNumber();
         
+        // Create appointment with first available technician
         Appointment appointment = new Appointment(
             customerCode,
-            technician.getTechnicianID(),
+            101,
             "Pending",
             dateTime,
             invoiceNumber,
@@ -359,10 +305,6 @@ public class ScheduleRepairDialog extends JDialog {
             }
         } else if (deviceCombo.getSelectedIndex() == -1) {
             throw new IllegalArgumentException("Please select a device");
-        }
-        
-        if (technicianCombo.getSelectedIndex() == -1) {
-            throw new IllegalArgumentException("Please select a technician");
         }
     }
 
