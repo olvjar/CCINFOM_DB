@@ -1,6 +1,7 @@
 package view.management;
 
 import model.entity.Customer;
+import model.service.CustomerService;
 import controller.CustomerController;
 import model.entity.Appointment;
 import controller.AppointmentController;
@@ -17,7 +18,8 @@ public class AppointmentManagementFrame extends JFrame {
     private JTextField customerCodeField, technicianIDField, serviceStatusField, dateAndTimeField, invoiceNumberField, paymentStatusField, amountPaidField, deviceIDField;
     private JButton addButton, updateButton, deleteButton, viewCustomerButton, viewTechnicianButton;
     private AppointmentController appointmentController = new AppointmentController();
-    private CustomerController customerController = new CustomerController();
+    private CustomerService customerService = new CustomerService ();
+    private CustomerController customerController = new CustomerController (customerService);
 
     public AppointmentManagementFrame() 
     {
