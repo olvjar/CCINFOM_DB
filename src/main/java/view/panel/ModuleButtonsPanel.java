@@ -9,6 +9,8 @@ import view.management.AppointmentManagementFrame;
 import view.utils.GuiUtils;
 import javax.swing.*;
 import java.awt.*;
+import controller.TechnicianController;
+import model.service.TechnicianService;
 
 public class ModuleButtonsPanel extends JPanel {
     public ModuleButtonsPanel() {
@@ -45,14 +47,11 @@ public class ModuleButtonsPanel extends JPanel {
 
     private void setupActionListeners(JButton... buttons) {
         buttons[0].addActionListener(e -> openCustomerManagement());
-        buttons[1].addActionListener(e -> 
-            JOptionPane.showMessageDialog(this, "Technician Management module is under development")
-        );
+        buttons[1].addActionListener(e -> openTechnicianManagement());
         buttons[2].addActionListener(e -> 
             JOptionPane.showMessageDialog(this, "Inventory Management module is under development")
         );
-        buttons[3].addActionListener(e -> 
-            new AppointmentManagementFrame().setVisible(true)
+        buttons[3].addActionListener(e -> new AppointmentManagementFrame().setVisible(true)
         );
     }
 
@@ -60,6 +59,13 @@ public class ModuleButtonsPanel extends JPanel {
         CustomerService customerService = new CustomerService();
         CustomerController customerController = new CustomerController(customerService);
         CustomerManagementFrame frame = new CustomerManagementFrame(customerController);
+        frame.setVisible(true);
+    }
+
+    private void openTechnicianManagement() {
+        TechnicianService technicianService = new TechnicianService();
+        TechnicianController technicianController = new TechnicianController(technicianService);
+        TechnicianManagementFrame frame = new TechnicianManagementFrame(technicianController);
         frame.setVisible(true);
     }
 } 
