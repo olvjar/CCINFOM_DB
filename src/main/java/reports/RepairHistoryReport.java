@@ -212,7 +212,7 @@ public class RepairHistoryReport {
             data[i][3] = repair.deviceDetails + " (ID: " + repair.deviceId + ")";
             data[i][4] = repair.deviceDescription != null ? repair.deviceDescription : "No description";
             data[i][5] = repair.technicianName;
-            data[i][6] = String.format("$%.2f", repair.amountPaid);
+            data[i][6] = String.format("₱%.2f", repair.amountPaid);
         }
         
         JTable table = new JTable(data, COLUMN_NAMES);
