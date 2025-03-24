@@ -7,12 +7,22 @@ import model.service.AppointmentService;
 import java.sql.SQLException;
 import java.util.List;
 
-public class AppointmentController 
-{
+public class AppointmentController {
     private AppointmentService appointmentService;
-    
+
+    // Constructor that takes an AppointmentService as an argument
+    public AppointmentController(AppointmentService appointmentService) {
+        this.appointmentService = appointmentService;
+    }
+
+    // Default constructor for compatibility
     public AppointmentController() {
         this.appointmentService = new AppointmentService();
+    }
+
+    // Generate a new invoice number
+    public String generateInvoiceNumber() {
+        return "INV-" + System.currentTimeMillis();
     }
     
     public void addAppointment(Appointment appointment) throws SQLException {
