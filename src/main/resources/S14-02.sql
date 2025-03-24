@@ -37,7 +37,17 @@ CREATE TABLE inventory (
     productName VARCHAR(100) NOT NULL,
     quantity INT NOT NULL,
     productStatus VARCHAR(100),
+    dateAdded DATE NOT NULL,
+    priceEach DECIMAL(10,2) NOT NULL,
     CONSTRAINT product_PK PRIMARY KEY (productCode)
+);
+
+CREATE TABLE inventory_usage (
+    usageId INT PRIMARY KEY AUTO_INCREMENT,
+    productCode VARCHAR(20) NOT NULL,
+    quantityUsed INT NOT NULL,
+    usageDate DATE NOT NULL,
+    FOREIGN KEY (productCode) REFERENCES inventory(productCode)
 );
 
 CREATE TABLE devices (
