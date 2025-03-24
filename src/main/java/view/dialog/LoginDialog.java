@@ -6,6 +6,7 @@ import java.awt.*;
 import javax.swing.*;
 import model.service.CustomerService;
 import model.service.TechnicianService;
+import view.TechnicianView;
 
 public class LoginDialog extends JDialog {
 
@@ -16,12 +17,14 @@ public class LoginDialog extends JDialog {
     private boolean authenticated = false;
     private String authenticatedId;
     private CustomerService customerService = new CustomerService();
+    private CustomerController customerController;
     private TechnicianService technicianService = new TechnicianService();
     private TechnicianController technicianController = new TechnicianController(technicianService);
 
-    public LoginDialog(JFrame parent, boolean isCustomer) {
+    public LoginDialog(Frame parent, boolean isCustomer, CustomerController customerController) {
         super(parent, "Login", true);
         this.isCustomer = isCustomer;
+        this.customerController = customerController;
         initComponents();
         pack();
         setLocationRelativeTo(parent);
@@ -132,6 +135,9 @@ public class LoginDialog extends JDialog {
                     authenticated = true;
                     authenticatedId = customerCode;
                     dispose();
+                    if (authenticated) {
+                        new TechnicianView(authenticatedId, customerController).setVisible(true);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(
                         this,
@@ -155,6 +161,9 @@ public class LoginDialog extends JDialog {
                     authenticated = true;
                     authenticatedId = techId;
                     dispose();
+                    if (authenticated) {
+                        new TechnicianView(authenticatedId, customerController).setVisible(true);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(
                         this,
