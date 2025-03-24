@@ -8,27 +8,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class TechnicianController {
-    private final TechnicianService technicianService;
+    private TechnicianService technicianService;
     private TechnicianManagementFrame view;
 
     public TechnicianController(TechnicianService technicianService) {
         this.technicianService = technicianService;
-    }
-
-    public boolean validateTechnician(String technicianId, String firstName, String lastName) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM technicians " +
-                "WHERE technicianID = ? AND firstName = ? AND lastName = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, technicianId);
-            pstmt.setString(2, firstName);
-            pstmt.setString(3, lastName);
-
-            ResultSet rs = pstmt.executeQuery();
-            return rs.next() && rs.getInt(1) > 0;
-        }
     }
 
     public void setView(TechnicianManagementFrame view) {
@@ -37,25 +21,36 @@ public class TechnicianController {
     }
 
     private void setupListeners() {
-        view.getSearchButton().addActionListener(e -> searchTechnicians());
+        if (view == null) return;
+        
+        view.getSearchButton().addActionListener(e -> {
+            try {
+                String searchText = view.getSearchField().getText().trim();
+                String criteria = view.getSearchCriteria();
+                
+                if (searchText.isEmpty()) {
+                    loadAllTechnicians();
+                    return;
+                }
+                
+                List<Technician> results = searchTechnicians(criteria, searchText);
+                view.updateTechnicianTable(results);
+            } catch (SQLException ex) {
+                showError("Error searching technicians: " + ex.getMessage());
+            }
+        });
         view.getAddButton().addActionListener(e -> addTechnician());
         view.getUpdateButton().addActionListener(e -> updateTechnician());
         view.getDeleteButton().addActionListener(e -> deleteTechnician());
         view.getViewAppointmentsButton().addActionListener(e -> viewAppointments());
     }
 
-    private void searchTechnicians() {
+    public void loadAllTechnicians() {
         try {
-            String searchText = view.getSearchText().trim();
-            String criteria = view.getSearchCriteria();
-
-            List<Technician> results = searchText.isEmpty() ?
-                    technicianService.getAllTechnicians() :
-                    technicianService.searchTechnicians(criteria, searchText);
-
-            view.updateTechnicianTable(results);
-        } catch (SQLException ex) {
-            showError("Search error: " + ex.getMessage());
+            List<Technician> technicians = technicianService.getAllTechnicians();
+            view.updateTechnicianTable(technicians);
+        } catch (SQLException e) {
+            showError("Error loading technicians: " + e.getMessage());
         }
     }
 
@@ -133,10 +128,22 @@ public class TechnicianController {
     }
 
     private void showError(String message) {
-        JOptionPane.showMessageDialog(view, message, "Error", JOptionPane.ERROR_MESSAGE);
+        if (view != null) {
+            JOptionPane.showMessageDialog(view, message, "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void showMessage(String message) {
-        JOptionPane.showMessageDialog(view, message, "Success", JOptionPane.INFORMATION_MESSAGE);
+        if (view != null) {
+            JOptionPane.showMessageDialog(view, message, "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    public boolean validateTechnician(String techId, String firstName, String lastName) throws SQLException {
+        return technicianService.validateTechnician(techId, firstName, lastName);
+    }
+
+    public List<Technician> searchTechnicians(String criteria, String searchText) throws SQLException {
+        return technicianService.searchTechnicians(criteria, searchText);
     }
 }
