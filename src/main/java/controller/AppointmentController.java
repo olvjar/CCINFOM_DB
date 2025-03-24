@@ -11,8 +11,8 @@ public class AppointmentController
 {
     private AppointmentService appointmentService;
     
-    public AppointmentController(AppointmentService appointmentService) {
-        this.appointmentService = appointmentService;
+    public AppointmentController() {
+        this.appointmentService = new AppointmentService();
     }
     
     public void addAppointment(Appointment appointment) throws SQLException {
@@ -48,9 +48,5 @@ public class AppointmentController
     public Technician getTechnicianByID (int technicianID) throws SQLException
     {
         return appointmentService.getTechnicianByID (technicianID);
-    }
-
-    public int generateInvoiceNumber() throws SQLException {
-        return appointmentService.generateInvoiceNumber();
     }
 }
