@@ -19,6 +19,7 @@ public class Appointment {
         this.customerCode = customerCode;
         this.technicianID = technicianID;
         this.serviceStatus = serviceStatus;
+        this.dateAndTime = dateAndTime;
         this.invoiceNumber = invoiceNumber;
         this.paymentStatus = paymentStatus;
         this.amountPaid = amountPaid;
