@@ -17,10 +17,11 @@ public class AppointmentManagementFrame extends JFrame {
     private JTextField customerCodeField, technicianIDField, dateAndTimeField, invoiceNumberField, amountPaidField, deviceIDField;
     private JComboBox<String> paymentStatusCombo, serviceStatusCombo;
     private JButton addButton, updateButton, deleteButton, viewCustomerButton, viewTechnicianButton, generateInvoiceButton;
-    private AppointmentController appointmentController = new AppointmentController();
+    private AppointmentController appointmentController;
 
-    public AppointmentManagementFrame() 
+    public AppointmentManagementFrame (AppointmentController controller) 
     {
+        this.appointmentController = controller;
         setTitle("Appointment Management");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
