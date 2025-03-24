@@ -142,4 +142,8 @@ public class InventoryController {
     public String generateProductCode() throws SQLException {
         return inventoryService.generateProductCode();
     }
+
+    public List<Map<String, Object>> getInventoryUsageReport(int year, int month) throws SQLException {
+        return inventoryService.getInventoryUsageReport(year, month);
+    }    
 }
