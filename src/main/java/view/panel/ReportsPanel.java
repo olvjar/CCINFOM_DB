@@ -18,12 +18,10 @@ public class ReportsPanel extends JPanel {
             RepairHistoryReport report = new RepairHistoryReport();
             report.generateReport();
         });
-        
+
         customerEngagementButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, 
-                "Customer Engagement Report is under development.", 
-                "Report Generation", 
-                JOptionPane.INFORMATION_MESSAGE);
+            CustomerEngagementReport report = new CustomerEngagementReport();
+            report.generateReport();
         });
         
         inventoryUsageButton.addActionListener(e -> {
