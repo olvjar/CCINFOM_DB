@@ -150,7 +150,7 @@ public class RevenueReport {
     }
     
     private JDialog createReportDialog() {
-        JDialog dialog = new JDialog((Frame)null, "Repair History Report", true);
+        JDialog dialog = new JDialog((Frame)null, "Revenue Report", true);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setSize(1200, 600);
         dialog.setLocationRelativeTo(null);
