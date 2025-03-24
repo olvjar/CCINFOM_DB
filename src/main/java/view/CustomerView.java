@@ -111,7 +111,7 @@ public class CustomerView extends JFrame {
         JButton logoutButton = new JButton("Logout");
         styleButton(logoutButton);
         logoutButton.addActionListener(e -> {
-            new LandingView().setVisible(true);
+            new LandingView(customerController).setVisible(true);
             dispose();
         });
         rightPanel.add(logoutButton);

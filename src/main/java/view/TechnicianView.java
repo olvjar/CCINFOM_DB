@@ -2,14 +2,17 @@ package view;
 
 import view.panel.ModuleButtonsPanel;
 import view.panel.ReportsPanel;
+import controller.CustomerController;
 import javax.swing.*;
 import java.awt.*;
 
 public class TechnicianView extends JFrame {
     private String technicianId;
+    private CustomerController customerController;
     
-    public TechnicianView(String technicianId) {
+    public TechnicianView(String technicianId, CustomerController customerController) {
         this.technicianId = technicianId;
+        this.customerController = customerController;
         setTitle("Repair Shop Management - Technician: " + technicianId);
         initializeFrame();
         setupComponents();
@@ -42,7 +45,7 @@ public class TechnicianView extends JFrame {
 
         JButton logoutButton = new JButton("Logout");
         logoutButton.addActionListener(e -> {
-            new LandingView().setVisible(true);
+            new LandingView(customerController).setVisible(true);
             dispose();
         });
         gbc.gridy = 3;

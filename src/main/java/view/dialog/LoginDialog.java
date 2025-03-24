@@ -16,7 +16,6 @@ public class LoginDialog extends JDialog {
     private boolean authenticated = false;
     private String authenticatedId;
     private CustomerService customerService = new CustomerService();
-    private CustomerController customerController = new CustomerController(customerService);
     private TechnicianService technicianService = new TechnicianService();
     private TechnicianController technicianController = new TechnicianController(technicianService);
 

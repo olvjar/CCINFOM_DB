@@ -9,11 +9,9 @@ import java.util.List;
 public class CustomerService {
     
     public void addCustomer(Customer customer) throws SQLException {
+        // data error checks
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null");
-        }
-        if (customer.getCustomerCode() == null || customer.getCustomerCode().trim().isEmpty()) {
-            throw new IllegalArgumentException("Customer code cannot be empty");
         }
         if (customer.getFirstName() == null || customer.getFirstName().trim().isEmpty()) {
             throw new IllegalArgumentException("First name cannot be empty");
@@ -21,11 +19,28 @@ public class CustomerService {
         if (customer.getLastName() == null || customer.getLastName().trim().isEmpty()) {
             throw new IllegalArgumentException("Last name cannot be empty");
         }
+        if (customer.getContactNumber() == null || customer.getContactNumber().trim().isEmpty()) {
+            throw new IllegalArgumentException("Contact number cannot be empty");
+        }
+        if (customer.getAddress() == null || customer.getAddress().trim().isEmpty()) {
+            throw new IllegalArgumentException("Address cannot be empty");
+        }
+
+        String customerCode = customer.getCustomerCode();
+        // from landing page signup
+        if (customerCode == null || customerCode.trim().isEmpty()) {
+            customerCode = generateCustomerCode();
+        } else {
+            // from management frame
+            if (getCustomerByCode(customerCode) != null) {
+                throw new IllegalArgumentException("Customer code already exists");
+            }
+        }
         
         String sql = "INSERT INTO customers (customerCode, firstName, lastName, contactNumber, address) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, customer.getCustomerCode());
+            pstmt.setInt(1, Integer.parseInt(customerCode));
             pstmt.setString(2, customer.getFirstName());
             pstmt.setString(3, customer.getLastName());
             pstmt.setString(4, customer.getContactNumber());
@@ -34,8 +49,23 @@ public class CustomerService {
         }
     }
 
+    private String generateCustomerCode() throws SQLException {
+        String sql = "SELECT customerCode FROM customers ORDER BY customerCode DESC LIMIT 1";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            if (rs.next()) {
+                int lastCode = rs.getInt("customerCode");
+                return String.valueOf(lastCode + 1);
+            } else {
+                return "1001";
+            }
+        }
+    }
+
     public void updateCustomer(Customer customer) throws SQLException {
-        // Validate input
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null");
         }
@@ -76,7 +106,7 @@ public class CustomerService {
         Connection conn = null;
         try {
             conn = DatabaseConnection.getConnection();
-            conn.setAutoCommit(false);  // Start transaction
+            conn.setAutoCommit(false);
             
             // First delete related appointments
             String deleteAppointments = "DELETE FROM appointments WHERE customerCode = ?";
@@ -92,11 +122,11 @@ public class CustomerService {
                 pstmt.executeUpdate();
             }
             
-            conn.commit();  // Commit transaction
+            conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
                 try {
-                    conn.rollback();  // Rollback on error
+                    conn.rollback();
                 } catch (SQLException ex) {
                     throw new SQLException("Error rolling back transaction: " + ex.getMessage());
                 }
@@ -245,16 +275,17 @@ public class CustomerService {
         String sql = "SELECT customerCode FROM customers WHERE firstName = ? AND lastName = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, firstName);
-            pstmt.setString(2, lastName);
+            stmt.setString(1, firstName);
+            stmt.setString(2, lastName);
             
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getString("customerCode");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("customerCode");
+                }
             }
-            return null;
         }
+        return null;
     }
 } 

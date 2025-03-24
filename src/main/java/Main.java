@@ -1,19 +1,23 @@
 import util.DatabaseInitializer;
 import view.LandingView;
 import javax.swing.*;
+import model.service.CustomerService;
+import controller.CustomerController;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            // Set system look and feel
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            
-            // Initialize database
             DatabaseInitializer.initialize();
             
-            // Launch GUI with landing page
+            // Create single instances for the entire application
+            CustomerService customerService = new CustomerService();
+            CustomerController customerController = new CustomerController(customerService);
+            
+            // Landing Page
             SwingUtilities.invokeLater(() -> {
-                new LandingView().setVisible(true);
+                LandingView landingView = new LandingView(customerController);
+                landingView.setVisible(true);
             });
 
         } catch (Exception e) {
