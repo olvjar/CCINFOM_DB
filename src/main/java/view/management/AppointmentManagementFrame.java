@@ -14,7 +14,8 @@ import java.util.List;
 public class AppointmentManagementFrame extends JFrame {
     private JTable appointmentTable;
     private DefaultTableModel tableModel;
-    private JTextField customerCodeField, technicianIDField, serviceStatusField, dateAndTimeField, invoiceNumberField, paymentStatusField, amountPaidField, deviceIDField;
+    private JTextField customerCodeField, technicianIDField, dateAndTimeField, invoiceNumberField, amountPaidField, deviceIDField;
+    private JComboBox<String> paymentStatusCombo, serviceStatusCombo;
     private JButton addButton, updateButton, deleteButton, viewCustomerButton, viewTechnicianButton;
     private AppointmentController appointmentController = new AppointmentController();
 
@@ -103,10 +104,15 @@ public class AppointmentManagementFrame extends JFrame {
 
         customerCodeField = new JTextField ();
         technicianIDField = new JTextField ();
-        serviceStatusField = new JTextField ();
+        serviceStatusCombo = new JComboBox<>(new String[]{
+            "Pending", "In Progress", "For Pickup",
+            "Completed", "Cancelled"
+        });
         dateAndTimeField = new JTextField ();
         invoiceNumberField = new JTextField ();
-        paymentStatusField = new JTextField ();
+        paymentStatusCombo = new JComboBox<>(new String [] {
+           "Pending", "Paid" 
+        });
         amountPaidField = new JTextField ();
         deviceIDField = new JTextField ();
         
@@ -115,13 +121,13 @@ public class AppointmentManagementFrame extends JFrame {
         inputPanel.add (new JLabel ("Technician ID:"));
         inputPanel.add (technicianIDField);
         inputPanel.add (new JLabel ("Service Status:"));
-        inputPanel.add (serviceStatusField);
+        inputPanel.add (serviceStatusCombo);
         inputPanel.add (new JLabel ("Date and Time"));
         inputPanel.add (dateAndTimeField);
         inputPanel.add (new JLabel ("Invoice Number:"));
         inputPanel.add (invoiceNumberField);
         inputPanel.add (new JLabel ("Payment Status:"));
-        inputPanel.add (paymentStatusField);
+        inputPanel.add (paymentStatusCombo);
         inputPanel.add (new JLabel ("Amount Paid:"));
         inputPanel.add (amountPaidField);
         inputPanel.add (new JLabel ("Device ID:"));
@@ -181,10 +187,10 @@ public class AppointmentManagementFrame extends JFrame {
                 if (selectedRow != -1) {
                     customerCodeField.setText (tableModel.getValueAt(selectedRow, 0).toString ());
                     technicianIDField.setText (tableModel.getValueAt(selectedRow, 1).toString ());
-                    serviceStatusField.setText (tableModel.getValueAt(selectedRow, 2).toString ());
+                    serviceStatusCombo.setSelectedItem (tableModel.getValueAt(selectedRow, 2).toString ());
                     dateAndTimeField.setText (tableModel.getValueAt(selectedRow, 3).toString ());
                     invoiceNumberField.setText (tableModel.getValueAt(selectedRow, 4).toString ());
-                    paymentStatusField.setText (tableModel.getValueAt(selectedRow, 5).toString ());
+                    paymentStatusCombo.setSelectedItem (tableModel.getValueAt(selectedRow, 5).toString ());
                     amountPaidField.setText (tableModel.getValueAt(selectedRow, 6).toString ());
                     deviceIDField.setText (tableModel.getValueAt(selectedRow, 7).toString ());
                 }
@@ -218,10 +224,10 @@ public class AppointmentManagementFrame extends JFrame {
             Appointment appointment = new Appointment(
                 Integer.parseInt (customerCodeField.getText ()),
                 Integer.parseInt (technicianIDField.getText ()),
-                serviceStatusField.getText (),
+                (String) serviceStatusCombo.getSelectedItem (),
                 dateAndTimeField.getText (),
                 Integer.parseInt (invoiceNumberField.getText ()),
-                paymentStatusField.getText (),
+                (String) paymentStatusCombo.getSelectedItem (),
                 Double.parseDouble (amountPaidField.getText ()),
                 Integer.parseInt (deviceIDField.getText ())
             );
@@ -246,10 +252,10 @@ public class AppointmentManagementFrame extends JFrame {
             Appointment appointment = new Appointment(
                 Integer.parseInt (customerCodeField.getText ()),
                 Integer.parseInt (technicianIDField.getText ()),
-                serviceStatusField.getText (),
+                (String) serviceStatusCombo.getSelectedItem (),
                 dateAndTimeField.getText (),
                 Integer.parseInt (invoiceNumberField.getText ()),
-                paymentStatusField.getText (),
+                (String) paymentStatusCombo.getSelectedItem (),
                 Double.parseDouble (amountPaidField.getText ()),
                 Integer.parseInt (deviceIDField.getText ())
             );
@@ -292,10 +298,10 @@ public class AppointmentManagementFrame extends JFrame {
     private void clearFields() {
         customerCodeField.setText ("");
         technicianIDField.setText ("");
-        serviceStatusField.setText ("");
+        serviceStatusCombo.setSelectedIndex (0);
         dateAndTimeField.setText ("");
         invoiceNumberField.setText ("");
-        paymentStatusField.setText ("");
+        paymentStatusCombo.setSelectedIndex (0);
         amountPaidField.setText ("");
         deviceIDField.setText ("");
     }
