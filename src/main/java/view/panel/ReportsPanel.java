@@ -38,10 +38,8 @@ public class ReportsPanel extends JPanel {
         });
         
         revenueButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, 
-                "Revenue Report is under development.", 
-                "Report Generation", 
-                JOptionPane.INFORMATION_MESSAGE);
+            RevenueReport report = new RevenueReport ();
+            report.generateReport ();
         });
         
         add(repairHistoryButton);
