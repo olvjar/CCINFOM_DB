@@ -4,6 +4,8 @@ import controller.InventoryController;
 import model.service.InventoryService;
 import controller.CustomerController;
 import model.service.CustomerService;
+import controller.AppointmentController;
+import model.service.AppointmentService;
 import view.management.CustomerManagementFrame;
 import view.management.TechnicianManagementFrame;
 import view.management.InventoryManagementFrame;
@@ -51,8 +53,7 @@ public class ModuleButtonsPanel extends JPanel {
         buttons[0].addActionListener(e -> openCustomerManagement());
         buttons[1].addActionListener(e -> openTechnicianManagement());
         buttons[2].addActionListener(e -> openInventoryManagement());
-        buttons[3].addActionListener(e -> new AppointmentManagementFrame().setVisible(true)
-        );
+        buttons[3].addActionListener(e -> openAppointmentManagement());
     }
     
 
@@ -72,6 +73,11 @@ public class ModuleButtonsPanel extends JPanel {
 
     private void openInventoryManagement() {
         InventoryManagementFrame frame = new InventoryManagementFrame(new InventoryController(new InventoryService()));
+        frame.setVisible(true);
+    }
+
+    private void openAppointmentManagement() {
+        AppointmentManagementFrame frame = new AppointmentManagementFrame(new AppointmentController(new AppointmentService()));
         frame.setVisible(true);
     }
 
