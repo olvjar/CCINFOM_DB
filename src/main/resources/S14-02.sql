@@ -44,7 +44,7 @@ CREATE TABLE inventory (
 
 CREATE TABLE inventory_usage (
     usageId INT PRIMARY KEY AUTO_INCREMENT,
-    productCode VARCHAR(20) NOT NULL,
+    productCode INT NOT NULL,
     quantityUsed INT NOT NULL,
     usageDate DATE NOT NULL,
     FOREIGN KEY (productCode) REFERENCES inventory(productCode)

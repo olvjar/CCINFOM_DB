@@ -13,13 +13,15 @@ public class InventoryService {
         if (inventory == null) {
             throw new IllegalArgumentException("Inventory cannot be null.");
         }
-        String sql = "INSERT INTO inventory (productCode, productName, quantityInStock, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO inventory (productCode, productName, quantity, productStatus, dateAdded, priceEach) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, inventory.getProductCode());
             pstmt.setString(2, inventory.getProductName());
             pstmt.setInt(3, inventory.getQuantityInStock());
             pstmt.setString(4, inventory.getStatus());
+            pstmt.setDate(5, new java.sql.Date(System.currentTimeMillis()));
+            pstmt.setDouble(6, 0.0);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error adding inventory item: " + e.getMessage());
@@ -32,7 +34,7 @@ public class InventoryService {
         if (inventory == null) {
             throw new IllegalArgumentException("Inventory cannot be null.");
         }
-        String sql = "UPDATE inventory SET productName = ?, quantityInStock = ?, status = ? WHERE productCode = ?";
+        String sql = "UPDATE inventory SET productName = ?, quantity = ?, productStatus = ? WHERE productCode = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, inventory.getProductName());
@@ -76,8 +78,8 @@ public class InventoryService {
                 return new Inventory(
                         rs.getString("productCode"),
                         rs.getString("productName"),
-                        rs.getInt("quantityInStock"),
-                        rs.getString("status")
+                        rs.getInt("quantity"),
+                        rs.getString("productStatus")
                 );
             }
         } catch (SQLException e) {
@@ -98,8 +100,8 @@ public class InventoryService {
                 inventoryList.add(new Inventory(
                         rs.getString("productCode"),
                         rs.getString("productName"),
-                        rs.getInt("quantityInStock"),
-                        rs.getString("status")
+                        rs.getInt("quantity"),
+                        rs.getString("productStatus")
                 ));
             }
         } catch (SQLException e) {
@@ -120,7 +122,7 @@ public class InventoryService {
                 columnName = "productName";
                 break;
             case "Status":
-                columnName = "status";
+                columnName = "productStatus";
                 break;
             default:
                 throw new IllegalArgumentException("Invalid search criteria: " + criteria);
@@ -136,8 +138,8 @@ public class InventoryService {
                 inventoryList.add(new Inventory(
                         rs.getString("productCode"),
                         rs.getString("productName"),
-                        rs.getInt("quantityInStock"),
-                        rs.getString("status")
+                        rs.getInt("quantity"),
+                        rs.getString("productStatus")
                 ));
             }
         } catch (SQLException e) {
