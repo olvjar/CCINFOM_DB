@@ -93,19 +93,63 @@ public class ScheduleRepairDialog extends JDialog {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setBorder(BorderFactory.createTitledBorder("Device Information"));
         
-        JRadioButton existingDeviceRadio = new JRadioButton("Select Existing Device");
-        JRadioButton newDeviceRadio = new JRadioButton("Add New Device");
-        ButtonGroup group = new ButtonGroup();
-        group.add(existingDeviceRadio);
-        group.add(newDeviceRadio);
-        
-        JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        radioPanel.add(existingDeviceRadio);
-        radioPanel.add(newDeviceRadio);
-        
         JPanel cardPanel = new JPanel(new CardLayout());
         
+        // Only show radio buttons if there are existing devices
+        if (!devices.isEmpty()) {
+            JRadioButton existingDeviceRadio = new JRadioButton("Select Existing Device");
+            JRadioButton newDeviceRadio = new JRadioButton("Add New Device");
+            ButtonGroup group = new ButtonGroup();
+            group.add(existingDeviceRadio);
+            group.add(newDeviceRadio);
+            
+            JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            radioPanel.add(existingDeviceRadio);
+            radioPanel.add(newDeviceRadio);
+            panel.add(radioPanel, BorderLayout.NORTH);
+            
+            // Setup radio button listeners
+            existingDeviceRadio.addActionListener(e -> {
+                CardLayout cl = (CardLayout) cardPanel.getLayout();
+                cl.show(cardPanel, "existing");
+                isNewDevice = false;
+                descriptionArea = existingDescriptionArea;
+            });
+            
+            newDeviceRadio.addActionListener(e -> {
+                CardLayout cl = (CardLayout) cardPanel.getLayout();
+                cl.show(cardPanel, "new");
+                isNewDevice = true;
+                descriptionArea = ((JTextArea) ((JScrollPane) deviceDetailsPanel.getComponent(9)).getViewport().getView());
+            });
+            
+            existingDeviceRadio.setSelected(true);
+        } else {
+            // If no devices, set isNewDevice to true by default
+            isNewDevice = true;
+        }
+
+        // Create panels for existing and new device
+        JPanel existingDevicePanel = createExistingDevicePanel();
+        deviceDetailsPanel = createNewDevicePanel();
+
+        cardPanel.add(existingDevicePanel, "existing");
+        cardPanel.add(deviceDetailsPanel, "new");
+        
+        // If no devices, show new device panel directly
+        if (devices.isEmpty()) {
+            CardLayout cl = (CardLayout) cardPanel.getLayout();
+            cl.show(cardPanel, "new");
+            descriptionArea = ((JTextArea) ((JScrollPane) deviceDetailsPanel.getComponent(9)).getViewport().getView());
+        }
+        
+        panel.add(cardPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel createExistingDevicePanel() {
         JPanel existingDevicePanel = new JPanel(new BorderLayout(5, 5));
+        
         deviceCombo = new JComboBox<>(devices.toArray(new Device[0]));
         deviceCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -171,8 +215,12 @@ public class ScheduleRepairDialog extends JDialog {
         existingDeviceContent.add(existingProblemPanel, BorderLayout.SOUTH);
         existingDevicePanel.add(existingDeviceContent, BorderLayout.CENTER);
 
-        deviceDetailsPanel = new JPanel(new GridBagLayout());
-        gbc = new GridBagConstraints();
+        return existingDevicePanel;
+    }
+
+    private JPanel createNewDevicePanel() {
+        JPanel newDevicePanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(2, 5, 2, 5);
         
@@ -180,38 +228,16 @@ public class ScheduleRepairDialog extends JDialog {
         brandField = new JTextField(20);
         modelField = new JTextField(20);
         serialField = new JTextField(20);
-        descriptionArea = new JTextArea(3, 20);
-        descriptionArea.setLineWrap(true);
+        JTextArea newDescriptionArea = new JTextArea(3, 20);
+        newDescriptionArea.setLineWrap(true);
         
-        addFormField(deviceDetailsPanel, "Type:", typeField, gbc, 0);
-        addFormField(deviceDetailsPanel, "Brand:", brandField, gbc, 1);
-        addFormField(deviceDetailsPanel, "Model:", modelField, gbc, 2);
-        addFormField(deviceDetailsPanel, "Serial Number:", serialField, gbc, 3);
-        addFormField(deviceDetailsPanel, "Problem Description:", new JScrollPane(descriptionArea), gbc, 4);
+        addFormField(newDevicePanel, "Type:", typeField, gbc, 0);
+        addFormField(newDevicePanel, "Brand:", brandField, gbc, 1);
+        addFormField(newDevicePanel, "Model:", modelField, gbc, 2);
+        addFormField(newDevicePanel, "Serial Number:", serialField, gbc, 3);
+        addFormField(newDevicePanel, "Problem Description:", new JScrollPane(newDescriptionArea), gbc, 4);
 
-        cardPanel.add(existingDevicePanel, "existing");
-        cardPanel.add(deviceDetailsPanel, "new");
-        
-        existingDeviceRadio.addActionListener(e -> {
-            CardLayout cl = (CardLayout) cardPanel.getLayout();
-            cl.show(cardPanel, "existing");
-            isNewDevice = false;
-            descriptionArea = existingDescriptionArea;  // Switch to existing description area
-        });
-        
-        newDeviceRadio.addActionListener(e -> {
-            CardLayout cl = (CardLayout) cardPanel.getLayout();
-            cl.show(cardPanel, "new");
-            isNewDevice = true;
-            descriptionArea = ((JTextArea) ((JScrollPane) deviceDetailsPanel.getComponent(9)).getViewport().getView());
-        });
-        
-        existingDeviceRadio.setSelected(true);
-        
-        panel.add(radioPanel, BorderLayout.NORTH);
-        panel.add(cardPanel, BorderLayout.CENTER);
-        
-        return panel;
+        return newDevicePanel;
     }
 
     private JPanel createScheduleSection() {
