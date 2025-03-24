@@ -1,11 +1,19 @@
 package view.panel;
 
+import controller.InventoryController;
 import reports.*;
 import javax.swing.*;
 import java.awt.*;
 
 public class ReportsPanel extends JPanel {
-    public ReportsPanel() {
+    private final InventoryController inventoryController;
+
+    public ReportsPanel(InventoryController inventoryController) {
+        this.inventoryController = inventoryController;
+        initializePanel();
+    }
+
+    private void initializePanel() {
         setBorder(BorderFactory.createTitledBorder("Reports"));
         setLayout(new GridLayout(2, 2, 10, 10));
         
@@ -25,15 +33,11 @@ public class ReportsPanel extends JPanel {
         });
         
         inventoryUsageButton.addActionListener(e -> {
-            // TEMP
-            JOptionPane.showMessageDialog(this, 
-                "Inventory Usage Report is under development.", 
-                "Report Generation", 
-                JOptionPane.INFORMATION_MESSAGE);
+            InventoryUsageReport report = new InventoryUsageReport(inventoryController);
+            report.generateReport();
         });
         
         revenueButton.addActionListener(e -> {
-            // TEMP
             JOptionPane.showMessageDialog(this, 
                 "Revenue Report is under development.", 
                 "Report Generation", 
@@ -51,4 +55,4 @@ public class ReportsPanel extends JPanel {
         button.setToolTipText(tooltip);
         return button;
     }
-} 
+}
