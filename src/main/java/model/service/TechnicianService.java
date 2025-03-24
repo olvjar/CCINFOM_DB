@@ -141,6 +141,7 @@ public class TechnicianService {
             pstmt.setInt(1, technicianID);
             ResultSet rs = pstmt.executeQuery();
 
+            List<String[]> appointments = new ArrayList<>();
             while (rs.next()) {
                 String deviceInfo = rs.getString("deviceType") != null ?
                         rs.getString("deviceType") + " - " + rs.getString("brand") + " " + rs.getString("model") :
@@ -155,7 +156,23 @@ public class TechnicianService {
                         rs.getString("customerName")
                 });
             }
+            return appointments;
         }
-        return appointments;
+    }
+
+    public boolean validateTechnician(String techId, String firstName, String lastName) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM technicians " +
+                    "WHERE technicianID = ? AND firstName = ? AND lastName = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, techId);
+            pstmt.setString(2, firstName);
+            pstmt.setString(3, lastName);
+
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        }
     }
 }
