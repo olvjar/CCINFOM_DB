@@ -49,6 +49,8 @@ public class InventoryController {
                 showMessage("Inventory item added successfully!");
             } catch (SQLException ex) {
                 showError("Error adding inventory item: " + ex.getMessage());
+            } catch (NumberFormatException ex) {
+                showError("Invalid input for quantity. Please enter a valid number.");
             }
         });
 
@@ -60,6 +62,8 @@ public class InventoryController {
                 showMessage("Inventory item updated successfully!");
             } catch (SQLException ex) {
                 showError("Error updating inventory item: " + ex.getMessage());
+            } catch (NumberFormatException ex) {
+                showError("Invalid input for quantity. Please enter a valid number.");
             }
         });
 
