@@ -138,4 +138,8 @@ public class DeviceController {
     public List<Device> searchDevices(String criteria, String searchText) throws SQLException {
         return deviceService.searchDevices(criteria, searchText);
     }
+
+    public int generateDeviceId() throws SQLException {
+        return deviceService.generateDeviceId();
+    }
 } 

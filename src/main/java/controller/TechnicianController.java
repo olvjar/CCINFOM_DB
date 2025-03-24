@@ -146,4 +146,8 @@ public class TechnicianController {
     public List<Technician> searchTechnicians(String criteria, String searchText) throws SQLException {
         return technicianService.searchTechnicians(criteria, searchText);
     }
+
+    public List<Technician> getAllTechnicians() throws SQLException {
+        return technicianService.getAllTechnicians();
+    }
 }

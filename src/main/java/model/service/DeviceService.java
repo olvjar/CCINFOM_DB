@@ -197,4 +197,16 @@ public class DeviceService {
         }
         return devices;
     }
+
+    public int generateDeviceId() throws SQLException {
+        String sql = "SELECT MAX(deviceID) FROM devices";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) + 1;
+            }
+            return 1; // Start with 1 if no existing devices
+        }
+    }
 } 
