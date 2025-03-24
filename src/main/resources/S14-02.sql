@@ -37,17 +37,7 @@ CREATE TABLE inventory (
     productName VARCHAR(100) NOT NULL,
     quantity INT NOT NULL,
     productStatus VARCHAR(100),
-    dateAdded DATE NOT NULL,
-    priceEach DECIMAL(10,2) NOT NULL,
     CONSTRAINT product_PK PRIMARY KEY (productCode)
-);
-
-CREATE TABLE inventory_usage (
-    usageId INT PRIMARY KEY AUTO_INCREMENT,
-    productCode VARCHAR(20) NOT NULL,
-    quantityUsed INT NOT NULL,
-    usageDate DATE NOT NULL,
-    FOREIGN KEY (productCode) REFERENCES inventory(productCode)
 );
 
 CREATE TABLE devices (
@@ -114,44 +104,17 @@ INSERT INTO devices VALUES
 (10, 1003, 'Desktop', 'Lenovo', 'IdeaCentre', 'SN012345', 'HDD failure');
 
 -- Inventory
-INSERT INTO inventory (productCode, productName, quantity, productStatus, dateAdded, priceEach) VALUES
-(1, 'RAM DDR4 8GB', 15, 'In Stock', '2023-01-15', 1899.00),
-(2, 'SSD 500GB', 20, 'In Stock', '2023-02-01', 2799.00),
-(3, 'Power Supply 650W', 10, 'In Stock', '2023-02-10', 3499.00),
-(4, 'Thermal Paste', 50, 'In Stock', '2023-03-05', 299.00),
-(5, 'GPU RTX 3060', 5, 'In Stock', '2023-03-20', 21999.00),
-(6, 'CPU i5 12th Gen', 8, 'In Stock', '2023-04-12', 12999.00),
-(7, 'Laptop Battery', 12, 'In Stock', '2023-05-01', 2499.00),
-(8, 'Keyboard', 25, 'In Stock', '2023-05-15', 1299.00),
-(9, 'Mouse', 30, 'In Stock', '2023-06-01', 899.00),
-(10, 'Monitor 24"', 7, 'In Stock', '2023-06-20', 7999.00);
-
-INSERT INTO inventory_usage (productCode, quantityUsed, usageDate) VALUES
--- January 2023
-(1, 2, '2023-01-20'),  -- RAM used in 2 repairs
-(4, 5, '2023-01-25'),  -- Thermal paste for 5 maintenance jobs
-
--- February 2023
-(2, 3, '2023-02-15'),  -- SSD upgrades
-(3, 1, '2023-02-20'),  -- PSU replacement
-
--- March 2023 (peak season)
-(1, 4, '2023-03-10'),  -- RAM upgrades
-(5, 1, '2023-03-15'),  -- High-end GPU installation
-(4, 8, '2023-03-20'),  -- Thermal paste for many cleanings
-
--- April 2023
-(6, 2, '2023-04-05'),  -- CPU replacements
-(7, 3, '2023-04-18'),  -- Laptop battery changes
-
--- May 2023
-(8, 5, '2023-05-10'),  -- Keyboard replacements
-(9, 7, '2023-05-22'),  -- Mouse replacements
-
--- June 2023
-(10, 2, '2023-06-05'), -- Monitor replacements
-(2, 2, '2023-06-15'),  -- More SSD upgrades
-(4, 6, '2023-06-25');  -- Thermal paste maintenance
+INSERT INTO inventory (productCode, productName, quantityInStock, productStatus) VALUES
+(1, 'RAM DDR4 8GB', 15, 'In Stock'),
+(2, 'SSD 500GB', 20, 'In Stock'),
+(3, 'Power Supply 650W', 10, 'In Stock'),
+(4, 'Thermal Paste', 50, 'In Stock'),
+(5, 'GPU RTX 3060', 5, 'In Stock'),
+(6, 'CPU i5 12th Gen', 8, 'In Stock'),
+(7, 'Laptop Battery', 12, 'In Stock'),
+(8, 'Keyboard', 25, 'In Stock'),
+(9, 'Mouse', 30, 'In Stock'),
+(10, 'Monitor 24"', 7, 'In Stock');
 
 -- Appointments
 INSERT INTO appointments (customerCode, technicianID, serviceStatus, dateAndTime, invoiceNumber, paymentStatus, amountPaid, deviceID) VALUES
