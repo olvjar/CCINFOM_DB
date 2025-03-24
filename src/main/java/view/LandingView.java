@@ -40,10 +40,8 @@ public class LandingView extends JFrame {
         technicianButton.addActionListener(e -> {
             LoginDialog loginDialog = new LoginDialog(this, false, customerController);
             loginDialog.setVisible(true);
-            
             if (loginDialog.isAuthenticated()) {
-                new TechnicianView(loginDialog.getAuthenticatedId(), customerController).setVisible(true);
-                dispose();
+                this.dispose();
             }
         });
         
