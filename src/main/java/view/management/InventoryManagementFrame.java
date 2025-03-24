@@ -32,7 +32,7 @@ public class InventoryManagementFrame extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Left panel
+        // Left panel for input and actions
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setPreferredSize(new Dimension(300, getHeight()));
 
@@ -43,9 +43,7 @@ public class InventoryManagementFrame extends JFrame {
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel filterLabel = new JLabel("Search by:");
-        searchCriteria = new JComboBox<>(new String[]{
-            "Product Code", "Product Name", "Status"
-        });
+        searchCriteria = new JComboBox<>(new String[]{"Product Code", "Product Name", "Status"});
         filterPanel.add(filterLabel);
         filterPanel.add(searchCriteria);
 
@@ -77,7 +75,7 @@ public class InventoryManagementFrame extends JFrame {
         inputPanel.add(new JLabel("Status:"));
         inputPanel.add(statusField);
 
-        // Button panel
+        // Button panel for actions
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 5, 5));
         buttonPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
 
@@ -138,7 +136,7 @@ public class InventoryManagementFrame extends JFrame {
         });
     }
 
-    // Getters for controller access
+    // Utility methods for interacting with the controller
     public JButton getAddButton() { return addButton; }
     public JButton getUpdateButton() { return updateButton; }
     public JButton getDeleteButton() { return deleteButton; }
