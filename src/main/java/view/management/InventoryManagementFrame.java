@@ -32,7 +32,7 @@ public class InventoryManagementFrame extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Left panel for input and actions
+        // Left panel
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setPreferredSize(new Dimension(300, getHeight()));
 
@@ -43,7 +43,9 @@ public class InventoryManagementFrame extends JFrame {
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel filterLabel = new JLabel("Search by:");
-        searchCriteria = new JComboBox<>(new String[]{"Product Code", "Product Name", "Status"});
+        searchCriteria = new JComboBox<>(new String[]{
+            "Product Code", "Product Name", "Status"
+        });
         filterPanel.add(filterLabel);
         filterPanel.add(searchCriteria);
 
@@ -75,7 +77,7 @@ public class InventoryManagementFrame extends JFrame {
         inputPanel.add(new JLabel("Status:"));
         inputPanel.add(statusField);
 
-        // Button panel for actions
+        // Button panel
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 5, 5));
         buttonPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
 
@@ -136,7 +138,67 @@ public class InventoryManagementFrame extends JFrame {
         });
     }
 
-    // Utility methods for interacting with the controller
+
+    // Add Inventory Item
+public void addInventoryItem() {
+    try {
+        Inventory inventory = getInventoryFromFields();
+        inventoryController.addInventoryItem(inventory);
+        inventoryController.loadAllInventoryItems();
+        clearFields();
+        JOptionPane.showMessageDialog(this, "Inventory item added successfully!");
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error adding inventory item: " + e.getMessage());
+    }
+}
+
+// Update Inventory Item
+public void updateInventoryItem() {
+    try {
+        Inventory inventory = getInventoryFromFields();
+        inventoryController.updateInventoryItem(inventory);
+        inventoryController.loadAllInventoryItems();
+        clearFields();
+        JOptionPane.showMessageDialog(this, "Inventory item updated successfully!");
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error updating inventory item: " + e.getMessage());
+    }
+}
+
+// Delete Inventory Item
+public void deleteInventoryItem() {
+    try {
+        String productCode = getSelectedProductCode();
+        if (productCode == null) {
+            JOptionPane.showMessageDialog(this, "Please select an item to delete.");
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this item?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            inventoryController.deleteInventoryItem(productCode);
+            inventoryController.loadAllInventoryItems();
+            clearFields();
+            JOptionPane.showMessageDialog(this, "Inventory item deleted successfully!");
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error deleting inventory item: " + e.getMessage());
+    }
+}
+
+// Search Inventory Items
+public void searchInventoryItems() {
+    try {
+        String criteria = getSearchCriteria();
+        String searchText = searchField.getText().trim();
+        List<Inventory> results = inventoryController.searchInventory(criteria, searchText);
+        updateTableWithResults(results);
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error searching inventory items: " + e.getMessage());
+    }
+}
+
+
+    // Getters for controller access
     public JButton getAddButton() { return addButton; }
     public JButton getUpdateButton() { return updateButton; }
     public JButton getDeleteButton() { return deleteButton; }
