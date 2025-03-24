@@ -1,5 +1,7 @@
 package model.service;
 
+import model.entity.Customer;
+import model.entity.Technician;
 import model.entity.Appointment;
 import util.DatabaseConnection;
 import java.sql.*;
@@ -213,6 +215,51 @@ public class AppointmentService {
                         rs.getString("paymentStatus"),
                         rs.getDouble("amountPaid"),
                         rs.getInt("deviceID")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+    
+    public Customer getCustomerByCode (String customerCode) throws SQLException
+    {
+        String sql = "SELECT * FROM customers WHERE customerCode = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString (1, customerCode);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Customer (
+                        rs.getString ("customerCode"),
+                        rs.getString ("firstName"),
+                        rs.getString ("lastName"),
+                        rs.getString ("contactNumber"),
+                        rs.getString ("address")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+    
+    public Technician getTechnicianByID (int technicianID) throws SQLException
+    {
+        String sql = "SELECT * FROM technicians WHERE technicianID = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, technicianID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Technician (
+                        rs.getInt ("technicianID"),
+                        rs.getString ("firstName"),
+                        rs.getString ("lastName"),
+                        rs.getString ("contactNumber"),
+                        rs.getString ("address"),
+                        rs.getString ("availability")
                     );
                 }
             }
