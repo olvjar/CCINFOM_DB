@@ -4,7 +4,6 @@ import model.entity.Customer;
 import model.entity.Technician;
 import model.entity.Appointment;
 import controller.AppointmentController;
-import model.service.AppointmentService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -17,21 +16,17 @@ public class AppointmentManagementFrame extends JFrame {
     private DefaultTableModel tableModel;
     private JTextField customerCodeField, technicianIDField, dateAndTimeField, invoiceNumberField, amountPaidField, deviceIDField;
     private JComboBox<String> paymentStatusCombo, serviceStatusCombo;
-    private JButton addButton, updateButton, deleteButton, viewCustomerButton, viewTechnicianButton;
-    private AppointmentController appointmentController;
+    private JButton addButton, updateButton, deleteButton, viewCustomerButton, viewTechnicianButton, generateInvoiceButton;
+    private AppointmentController appointmentController = new AppointmentController();
 
-    public AppointmentManagementFrame() {
-        // Initialize controller with service
-        AppointmentService appointmentService = new AppointmentService();
-        this.appointmentController = new AppointmentController(appointmentService);
-        
+    public AppointmentManagementFrame() 
+    {
         setTitle("Appointment Management");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         
         initComponents();
-        loadAppointments();
+        loadAppointmentData();
     }
 
     private void initComponents() {
@@ -69,12 +64,13 @@ public class AppointmentManagementFrame extends JFrame {
         searchPanel.add(searchBarPanel);
 
         // search functionality
-        searchButton.addActionListener(e -> {
+        searchButton.addActionListener(e -> 
+        {
             String searchText = searchField.getText().trim();
             String criteria = (String) searchCriteria.getSelectedItem();
             
             if (searchText.isEmpty()) {
-                loadAppointments(); // Reset to show all if search is empty
+                loadAppointmentData(); // Reset to show all if search is empty
                 return;
             }
             
@@ -92,7 +88,7 @@ public class AppointmentManagementFrame extends JFrame {
         // reset search
         searchField.addActionListener(e -> {
             if (searchField.getText().trim().isEmpty()) {
-                loadAppointments();
+                loadAppointmentData();
             }
         });
 
@@ -139,7 +135,7 @@ public class AppointmentManagementFrame extends JFrame {
         inputPanel.add (deviceIDField);
 
         // button panel
-        JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(6, 1, 5, 5));
         buttonPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
 
         addButton = new JButton("Add Appointment");
@@ -147,12 +143,14 @@ public class AppointmentManagementFrame extends JFrame {
         deleteButton = new JButton("Delete Appointment");
         viewCustomerButton = new JButton ("View Customer");
         viewTechnicianButton = new JButton ("View Technician");
+        generateInvoiceButton = new JButton ("Generate Invoice");
 
         buttonPanel.add(addButton);
         buttonPanel.add(updateButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add (viewCustomerButton);
         buttonPanel.add (viewTechnicianButton);
+        buttonPanel.add (generateInvoiceButton);
         
         // exit button
         JPanel exitPanel = new JPanel(new GridLayout(1, 1, 5, 5));
@@ -183,6 +181,7 @@ public class AppointmentManagementFrame extends JFrame {
         deleteButton.addActionListener(e -> deleteAppointment());
         viewCustomerButton.addActionListener (e -> viewCustomer ());
         viewTechnicianButton.addActionListener (e -> viewTechnician ());
+        generateInvoiceButton.addActionListener (e -> generateInvoice ());
         exitButton.addActionListener(e -> dispose());
 
         // table selection listener
@@ -203,7 +202,7 @@ public class AppointmentManagementFrame extends JFrame {
         });
     }
 
-    private void loadAppointments() {
+    private void loadAppointmentData() {
         tableModel.setRowCount(0);
         try {
             for (Appointment appointment : appointmentController.getAllAppointments()) {
@@ -238,7 +237,7 @@ public class AppointmentManagementFrame extends JFrame {
             );
             
             appointmentController.addAppointment (appointment);
-            loadAppointments();
+            loadAppointmentData();
             clearFields();
             JOptionPane.showMessageDialog(this, "Appointment added successfully!");
         } catch (SQLException e) {
@@ -266,7 +265,7 @@ public class AppointmentManagementFrame extends JFrame {
             );
             
             appointmentController.updateAppointment (appointment);
-            loadAppointments();
+            loadAppointmentData();
             clearFields();
             JOptionPane.showMessageDialog(this, "Appointment updated successfully!");
         } catch (SQLException e) {
@@ -291,7 +290,7 @@ public class AppointmentManagementFrame extends JFrame {
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 appointmentController.deleteAppointment (invoiceNumber);
-                loadAppointments();
+                loadAppointmentData();
                 clearFields();
                 JOptionPane.showMessageDialog(this, "Appointment deleted successfully!");
             } catch (SQLException e) {
@@ -473,5 +472,182 @@ public class AppointmentManagementFrame extends JFrame {
         technicianDialog.add(mainPanel);
         technicianDialog.setLocationRelativeTo(this);
         technicianDialog.setVisible(true);
+    }
+    
+    public void generateInvoice ()
+    {
+        int selectedRow = appointmentTable.getSelectedRow ();
+        if (selectedRow == -1)
+        {
+            JOptionPane.showMessageDialog(this, "Please select an appointment to generate an invoice for.");
+            return;
+        }
+        
+        String serviceStatus = String.valueOf (tableModel.getValueAt (selectedRow, 2));
+        String invoiceNumber = String.valueOf (tableModel.getValueAt (selectedRow, 4));
+        String paymentStatus = String.valueOf (tableModel.getValueAt (selectedRow, 5));
+        
+        if (!serviceStatus.equals ("Completed") || paymentStatus.equals ("Paid"))
+        {
+            JOptionPane.showMessageDialog (this, "Unable to generate invoice.");
+            return;
+        }
+        
+        JDialog invoiceDialog = new JDialog (this, "Invoice #" + invoiceNumber, true);
+        invoiceDialog.setSize (400, 300);
+        
+        // Create main panel with border layout
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // North 
+        JLabel lblNorth = new JLabel ("<html><h2> Generate Invoice </h2></html>", SwingConstants.CENTER);
+        mainPanel.add (lblNorth, BorderLayout.NORTH);
+    
+        // Center panel stuff
+        JPanel centerPanel = new JPanel ();
+        centerPanel.setLayout (new GridBagLayout ());
+        mainPanel.add (centerPanel, BorderLayout.CENTER);
+        
+        GridBagConstraints gbc = new GridBagConstraints ();
+        gbc.insets = new Insets (10, 10, 10, 10);
+        
+            // input cost
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        
+        JPanel inputCostPanel = new JPanel ();
+        BoxLayout inputCostBoxLayout = new BoxLayout (inputCostPanel, BoxLayout.X_AXIS);
+        
+        JLabel inputCostText = new JLabel ("Enter cost of service: ");
+        inputCostPanel.add (inputCostText);
+        
+        JTextField inputCostTextField = new JTextField (5);
+        inputCostPanel.add (inputCostTextField);
+        
+        centerPanel.add (inputCostPanel, gbc);
+        
+            // create invoice button
+        gbc.gridy = 1;
+    
+        JButton createInvoiceButton = new JButton ("Generate");
+        createInvoiceButton.addActionListener (e -> 
+        {
+            double userInput = Double.parseDouble (inputCostTextField.getText ());
+            if (userInput <= 0)
+            {
+                JOptionPane.showMessageDialog (this, "Invalid amount.");
+            }
+            else
+            {
+                createInvoice (Integer.parseInt (invoiceNumber), userInput);
+                invoiceDialog.dispose ();
+            }
+        });
+        
+        centerPanel.add (createInvoiceButton, gbc);
+        
+        // Add close button at the bottom
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> invoiceDialog.dispose());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(closeButton);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        invoiceDialog.add(mainPanel);
+        invoiceDialog.setLocationRelativeTo(this);
+        invoiceDialog.setVisible(true);
+    }
+    
+    public void createInvoice (int invoiceNumber, double userInput)
+    {
+        JDialog invoiceDialog = new JDialog (this, "Invoice #" + invoiceNumber, true);
+        invoiceDialog.setSize (400, 300);
+
+        Appointment appointment = null;
+        Customer customer = null;
+
+        try
+        {
+            appointment = appointmentController.getAppointmentByInvoiceNumber (invoiceNumber);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace ();
+        }
+        
+        try
+        {
+        customer = appointmentController.getCustomerByCode (String.valueOf (appointment.getCustomerCode ()));
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace ();
+        }
+        
+        String customerCode = customer.getCustomerCode ();
+        String customerName = customer.getFullName ();
+        int deviceID = appointment.getDeviceID ();
+        double cost = userInput;
+        
+        Appointment updatedAppointment = new Appointment(
+                        appointment.getCustomerCode (),
+                        appointment.getTechnicianID (),
+                        appointment.getServiceStatus (),
+                        appointment.getDateAndTime (),
+                        appointment.getInvoiceNumber (),
+                        "Paid",
+                        cost,
+                        appointment.getDeviceID ());
+        
+        // Create main panel with border layout
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // north
+        JLabel lblNorth = new JLabel (
+            "<html><h2>"
+            + "Customer Code: " + customerCode
+            + "<br>" + "Customer Name: " + customerName
+            + "<br>" + "Device ID: " + deviceID
+            + "<br>" + "Amount to be paid: " + cost
+            + "</h2></html>", SwingConstants.CENTER
+        );
+        mainPanel.add (lblNorth, BorderLayout.NORTH);
+        
+        // center panel
+        JPanel centerPanel = new JPanel ();
+        centerPanel.setLayout (new BoxLayout (centerPanel, BoxLayout.Y_AXIS));
+        mainPanel.add (centerPanel, BorderLayout.CENTER);
+        
+            // buttons for center panel
+            // paid
+        JButton paidButton = new JButton ("Paid");
+        paidButton.addActionListener (e -> 
+        {
+            try
+            {
+                appointmentController.updateAppointment (updatedAppointment);
+                loadAppointmentData ();
+                invoiceDialog.dispose ();
+            }
+            catch (SQLException f)
+            {
+                f.printStackTrace ();
+            }
+        });
+
+        centerPanel.add (paidButton);
+        
+            // close
+        JButton closeButton = new JButton ("Close");
+        closeButton.addActionListener(e -> invoiceDialog.dispose());
+        
+        centerPanel.add (closeButton);
+        
+        //
+        invoiceDialog.add (mainPanel);
+        invoiceDialog.setLocationRelativeTo(this);
+        invoiceDialog.setVisible(true);
     }
 } 
