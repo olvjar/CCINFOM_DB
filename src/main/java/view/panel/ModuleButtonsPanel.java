@@ -1,9 +1,7 @@
 package view.panel;
 
 import controller.CustomerController;
-import controller.AppointmentController;
 import model.service.CustomerService;
-import model.service.AppointmentService;
 import view.management.CustomerManagementFrame;
 import view.management.TechnicianManagementFrame;
 import view.management.InventoryManagementFrame;
@@ -50,11 +48,11 @@ public class ModuleButtonsPanel extends JPanel {
     private void setupActionListeners(JButton... buttons) {
         buttons[0].addActionListener(e -> openCustomerManagement());
         buttons[1].addActionListener(e -> openTechnicianManagement());
-        buttons[2].addActionListener(e -> 
-            JOptionPane.showMessageDialog(this, "Inventory Management module is under development")
+        buttons[2].addActionListener(e -> openInventoryManagement());
+        buttons[3].addActionListener(e -> new AppointmentManagementFrame().setVisible(true)
         );
-        buttons[3].addActionListener(e -> openAppointmentManagement());
     }
+    
 
     private void openCustomerManagement() {
         CustomerService customerService = new CustomerService();
@@ -69,12 +67,10 @@ public class ModuleButtonsPanel extends JPanel {
         TechnicianManagementFrame frame = new TechnicianManagementFrame(technicianController);
         frame.setVisible(true);
     }
-    
-    public void openAppointmentManagement ()
-    {
-        AppointmentService appointmentService = new AppointmentService ();
-        AppointmentController appointmentController = new AppointmentController (appointmentService);
-        AppointmentManagementFrame frame = new AppointmentManagementFrame (appointmentController);
-        frame.setVisible (true);
+
+    private void openInventoryManagement() {
+        InventoryManagementFrame frame = new InventoryManagementFrame(new InventoryController(new InventoryService()));
+        frame.setVisible(true);
     }
+
 } 
