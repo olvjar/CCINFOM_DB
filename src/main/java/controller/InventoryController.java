@@ -6,6 +6,7 @@ import view.management.InventoryManagementFrame;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JOptionPane;
+import java.util.Map;
 
 public class InventoryController {
     private InventoryService inventoryService;
