@@ -5,6 +5,9 @@ import view.panel.ReportsPanel;
 import controller.CustomerController;
 import javax.swing.*;
 import java.awt.*;
+import controller.InventoryController;
+import model.service.InventoryService;
+import view.panel.ReportsPanel;
 
 public class TechnicianView extends JFrame {
     private String technicianId;
@@ -16,6 +19,11 @@ public class TechnicianView extends JFrame {
         setTitle("Repair Shop Management - Technician: " + technicianId);
         initializeFrame();
         setupComponents();
+        
+        InventoryService inventoryService = new InventoryService();
+        InventoryController inventoryController = new InventoryController(inventoryService);
+        
+        ReportsPanel reportsPanel = new ReportsPanel(inventoryController);
     }
 
     private void initializeFrame() {
