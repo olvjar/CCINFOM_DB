@@ -138,6 +138,7 @@ public class InventoryManagementFrame extends JFrame {
         });
     }
 
+    // Getters for controller access
     public JButton getAddButton() { return addButton; }
     public JButton getUpdateButton() { return updateButton; }
     public JButton getDeleteButton() { return deleteButton; }
