@@ -3,8 +3,7 @@ package model.service;
 import model.entity.Appointment;
 import util.DatabaseConnection;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class AppointmentService {
     // Add appointment.
@@ -160,7 +159,7 @@ public class AppointmentService {
                     rs.getInt("customerCode"),
                     rs.getInt("technicianID"),
                     rs.getString("serviceStatus"),
-                    rs.getString("dateAndTime"),
+                    rs.getTimestamp("dateAndTime").toString(),
                     rs.getInt("invoiceNumber"),
                     rs.getString("paymentStatus"),
                     rs.getDouble("amountPaid"),
@@ -185,7 +184,7 @@ public class AppointmentService {
                     rs.getInt("customerCode"),
                     rs.getInt("technicianID"),
                     rs.getString("serviceStatus"),
-                    rs.getString("dateAndTime"),
+                    rs.getTimestamp("dateAndTime").toString(),
                     rs.getInt("invoiceNumber"),
                     rs.getString("paymentStatus"),
                     rs.getDouble("amountPaid"),
@@ -209,7 +208,7 @@ public class AppointmentService {
                         rs.getInt("customerCode"),
                         rs.getInt("technicianID"),
                         rs.getString("serviceStatus"),
-                        rs.getString("dateAndTime"),
+                        rs.getTimestamp("dateAndTime").toString(),
                         rs.getInt("invoiceNumber"),
                         rs.getString("paymentStatus"),
                         rs.getDouble("amountPaid"),
