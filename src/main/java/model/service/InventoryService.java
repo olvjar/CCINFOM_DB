@@ -13,7 +13,7 @@ public class InventoryService {
         if (inventory == null) {
             throw new IllegalArgumentException("Inventory cannot be null.");
         }
-        String sql = "INSERT INTO inventory (productCode, productName, quantity, productStatus, dateAdded, priceEach) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO inventory (productCode, productName, quantityInStock, productStatus) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, inventory.getProductCode());
@@ -34,7 +34,7 @@ public class InventoryService {
         if (inventory == null) {
             throw new IllegalArgumentException("Inventory cannot be null.");
         }
-        String sql = "UPDATE inventory SET productName = ?, quantity = ?, productStatus = ? WHERE productCode = ?";
+        String sql = "UPDATE inventory SET productName = ?, quantityInStock = ?, productStatus = ? WHERE productCode = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, inventory.getProductName());
@@ -78,7 +78,7 @@ public class InventoryService {
                 return new Inventory(
                         rs.getString("productCode"),
                         rs.getString("productName"),
-                        rs.getInt("quantity"),
+                        rs.getInt("quantityInStock"),
                         rs.getString("productStatus")
                 );
             }
@@ -98,11 +98,11 @@ public class InventoryService {
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 inventoryList.add(new Inventory(
-                        rs.getString("productCode"),
+                        rs.getInt("productCode")),
                         rs.getString("productName"),
-                        rs.getInt("quantity"),
+                        rs.getInt("quantityInStock"),
                         rs.getString("productStatus")
-                ));
+                );
             }
         } catch (SQLException e) {
             System.err.println("Error retrieving inventory items: " + e.getMessage());
@@ -136,11 +136,11 @@ public class InventoryService {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 inventoryList.add(new Inventory(
-                        rs.getString("productCode"),
+                        rs.getInt("productCode")),
                         rs.getString("productName"),
-                        rs.getInt("quantity"),
+                        rs.getInt("quantityInStock"),
                         rs.getString("productStatus")
-                ));
+                );
             }
         } catch (SQLException e) {
             System.err.println("Error searching inventory items: " + e.getMessage());
