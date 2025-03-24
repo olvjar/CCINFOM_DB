@@ -4,6 +4,7 @@ import model.entity.Customer;
 import model.entity.Technician;
 import model.entity.Appointment;
 import controller.AppointmentController;
+import model.service.AppointmentService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -17,16 +18,20 @@ public class AppointmentManagementFrame extends JFrame {
     private JTextField customerCodeField, technicianIDField, dateAndTimeField, invoiceNumberField, amountPaidField, deviceIDField;
     private JComboBox<String> paymentStatusCombo, serviceStatusCombo;
     private JButton addButton, updateButton, deleteButton, viewCustomerButton, viewTechnicianButton;
-    private AppointmentController appointmentController = new AppointmentController();
+    private AppointmentController appointmentController;
 
-    public AppointmentManagementFrame() 
-    {
+    public AppointmentManagementFrame() {
+        // Initialize controller with service
+        AppointmentService appointmentService = new AppointmentService();
+        this.appointmentController = new AppointmentController(appointmentService);
+        
         setTitle("Appointment Management");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
         
         initComponents();
-        loadAppointmentData();
+        loadAppointments();
     }
 
     private void initComponents() {
@@ -69,7 +74,7 @@ public class AppointmentManagementFrame extends JFrame {
             String criteria = (String) searchCriteria.getSelectedItem();
             
             if (searchText.isEmpty()) {
-                loadAppointmentData(); // Reset to show all if search is empty
+                loadAppointments(); // Reset to show all if search is empty
                 return;
             }
             
@@ -87,7 +92,7 @@ public class AppointmentManagementFrame extends JFrame {
         // reset search
         searchField.addActionListener(e -> {
             if (searchField.getText().trim().isEmpty()) {
-                loadAppointmentData();
+                loadAppointments();
             }
         });
 
@@ -198,7 +203,7 @@ public class AppointmentManagementFrame extends JFrame {
         });
     }
 
-    private void loadAppointmentData() {
+    private void loadAppointments() {
         tableModel.setRowCount(0);
         try {
             for (Appointment appointment : appointmentController.getAllAppointments()) {
@@ -233,7 +238,7 @@ public class AppointmentManagementFrame extends JFrame {
             );
             
             appointmentController.addAppointment (appointment);
-            loadAppointmentData();
+            loadAppointments();
             clearFields();
             JOptionPane.showMessageDialog(this, "Appointment added successfully!");
         } catch (SQLException e) {
@@ -261,7 +266,7 @@ public class AppointmentManagementFrame extends JFrame {
             );
             
             appointmentController.updateAppointment (appointment);
-            loadAppointmentData();
+            loadAppointments();
             clearFields();
             JOptionPane.showMessageDialog(this, "Appointment updated successfully!");
         } catch (SQLException e) {
@@ -286,7 +291,7 @@ public class AppointmentManagementFrame extends JFrame {
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 appointmentController.deleteAppointment (invoiceNumber);
-                loadAppointmentData();
+                loadAppointments();
                 clearFields();
                 JOptionPane.showMessageDialog(this, "Appointment deleted successfully!");
             } catch (SQLException e) {
