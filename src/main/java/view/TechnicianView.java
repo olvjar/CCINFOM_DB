@@ -20,11 +20,6 @@ public class TechnicianView extends JFrame {
         setTitle("Repair Shop Management - Technician: " + technicianId);
         initializeFrame();
         setupComponents();
-        
-        InventoryService inventoryService = new InventoryService();
-        InventoryController inventoryController = new InventoryController(inventoryService);
-        
-        ReportsPanel reportsPanel = new ReportsPanel(inventoryController);
     }
 
     private void initializeFrame() {
@@ -47,6 +42,9 @@ public class TechnicianView extends JFrame {
         mainPanel.add(moduleButtonsPanel, gbc);
 
         // reports panel
+        InventoryService inventoryService = new InventoryService();
+        InventoryController inventoryController = new InventoryController(inventoryService);
+        
         ReportsPanel reportsPanel = new ReportsPanel(inventoryController);
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.BOTH;
