@@ -12,6 +12,7 @@ import view.panel.ReportsPanel;
 public class TechnicianView extends JFrame {
     private String technicianId;
     private CustomerController customerController;
+    private InventoryController inventoryController;
     
     public TechnicianView(String technicianId, CustomerController customerController) {
         this.technicianId = technicianId;
@@ -46,7 +47,7 @@ public class TechnicianView extends JFrame {
         mainPanel.add(moduleButtonsPanel, gbc);
 
         // reports panel
-        ReportsPanel reportsPanel = new ReportsPanel();
+        ReportsPanel reportsPanel = new ReportsPanel(inventoryController);
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.BOTH;
         mainPanel.add(reportsPanel, gbc);
