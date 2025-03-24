@@ -138,71 +138,36 @@ public class InventoryManagementFrame extends JFrame {
         });
     }
 
-    private void addInventoryItem() {
-        try {
-            Inventory inventory = new Inventory(
-                productCodeField.getText(),
-                productNameField.getText(),
-                Integer.parseInt(quantityField.getText()),
-                statusField.getText()
-            );
-            inventoryController.addInventoryItem(inventory);
-            inventoryController.loadAllInventoryItems();
-            clearFields();
-            JOptionPane.showMessageDialog(this, "Item added successfully!");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error adding item: " + e.getMessage());
-        }
+    public JButton getAddButton() { return addButton; }
+    public JButton getUpdateButton() { return updateButton; }
+    public JButton getDeleteButton() { return deleteButton; }
+    public JButton getSearchButton() { return searchButton; }
+    public JTextField getSearchField() { return searchField; }
+    public String getSearchCriteria() { return (String) searchCriteria.getSelectedItem(); }
+
+    public Inventory getInventoryFromFields() {
+        return new Inventory(
+            productCodeField.getText(),
+            productNameField.getText(),
+            Integer.parseInt(quantityField.getText()),
+            statusField.getText()
+        );
     }
 
-    private void updateInventoryItem() {
-        try {
-            Inventory inventory = new Inventory(
-                productCodeField.getText(),
-                productNameField.getText(),
-                Integer.parseInt(quantityField.getText()),
-                statusField.getText()
-            );
-            inventoryController.updateInventoryItem(inventory);
-            inventoryController.loadAllInventoryItems();
-            clearFields();
-            JOptionPane.showMessageDialog(this, "Item updated successfully!");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error updating item: " + e.getMessage());
-        }
+    public String getSelectedProductCode() {
+        int selectedRow = inventoryTable.getSelectedRow();
+        if (selectedRow == -1) return null;
+        return (String) tableModel.getValueAt(selectedRow, 0);
     }
 
-    private void deleteInventoryItem() {
-        try {
-            String productCode = productCodeField.getText();
-            inventoryController.deleteInventoryItem(productCode);
-            inventoryController.loadAllInventoryItems();
-            clearFields();
-            JOptionPane.showMessageDialog(this, "Item deleted successfully!");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error deleting item: " + e.getMessage());
-        }
-    }
-
-    private void searchInventoryItems() {
-        try {
-            String criteria = (String) searchCriteria.getSelectedItem();
-            String searchText = searchField.getText().trim();
-            List<Inventory> results = inventoryController.searchInventory(criteria, searchText);
-            updateTableWithResults(results);
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error searching items: " + e.getMessage());
-        }
-    }
-
-    private void clearFields() {
+    public void clearFields() {
         productCodeField.setText("");
         productNameField.setText("");
         quantityField.setText("");
         statusField.setText("");
     }
 
-    private void updateTableWithResults(List<Inventory> inventoryList) {
+    public void updateTableWithResults(List<Inventory> inventoryList) {
         tableModel.setRowCount(0);
         for (Inventory inventory : inventoryList) {
             Object[] row = {
